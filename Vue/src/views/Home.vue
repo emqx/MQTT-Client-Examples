@@ -80,10 +80,17 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-button type="success" size="small" class="subscribe-btn" @click="doSubscribe">
+            <el-button
+              :disabled="!client.connected"
+              type="success"
+              size="small"
+              class="subscribe-btn"
+              @click="doSubscribe"
+            >
               {{ subscribeSuccess ? 'Subscribed' : 'Subscribe' }}
             </el-button>
             <el-button
+              :disabled="!client.connected"
               type="success"
               size="small"
               class="subscribe-btn"
@@ -128,7 +135,7 @@
         </el-row>
       </el-form>
       <el-col :span="24">
-        <el-button type="success" size="small" class="publish-btn" @click="doPublish">
+        <el-button :disabled="!client.connected" type="success" size="small" class="publish-btn" @click="doPublish">
           Publish
         </el-button>
       </el-col>
@@ -165,11 +172,11 @@ export default {
         password: 'emqx_test',
       },
       subscription: {
-        topic: 'topic/test',
+        topic: 'topic/mqttx',
         qos: 0,
       },
       publish: {
-        topic: 'topic/client',
+        topic: 'topic/browser',
         qos: 0,
         payload: '{ "msg": "Hello, I am browser." }',
       },
@@ -203,17 +210,14 @@ export default {
         console.log('mqtt.connect error', error)
       }
       this.client.on('connect', () => {
-        console.log('connection succeeded!')
+        console.log('Connection succeeded!')
       })
       this.client.on('error', error => {
-        console.log('connection failed', error)
-      })
-      this.client.on('reconnect', error => {
-        console.log('reconnecting', error)
+        console.log('Connection failed', error)
       })
       this.client.on('message', (topic, message) => {
         this.receiveNews = this.receiveNews.concat(message)
-        console.log(`received message ${message} from topic ${topic}`)
+        console.log(`Received message ${message} from topic ${topic}`)
       })
     },
     // 订阅主题
@@ -221,11 +225,11 @@ export default {
       const { topic, qos } = this.subscription
       this.client.subscribe(topic, qos, (error, res) => {
         if (error) {
-          console.log('subscribe to topics error', error)
+          console.log('Subscribe to topics error', error)
           return
         }
         this.subscribeSuccess = true
-        console.log('subscribe to topics res', res)
+        console.log('Subscribe to topics res', res)
       })
     },
     // 取消订阅
@@ -233,7 +237,7 @@ export default {
       const { topic } = this.subscription
       this.client.unsubscribe(topic, error => {
         if (error) {
-          console.log('unsubscribe error', error)
+          console.log('Unsubscribe error', error)
         }
       })
     },
@@ -242,7 +246,7 @@ export default {
       const { topic, qos, payload } = this.publish
       this.client.publish(topic, payload, qos, error => {
         if (error) {
-          console.log('publish error', error)
+          console.log('Publish error', error)
         }
       })
     },
@@ -251,7 +255,9 @@ export default {
       if (this.client.connected) {
         try {
           this.client.end()
-          this.client = null
+          this.client = {
+            connected: false,
+          }
           console.log('Successfully disconnected!')
         } catch (error) {
           console.log('Disconnect failed', error.toString())
