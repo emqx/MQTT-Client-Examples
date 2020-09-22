@@ -1,5 +1,6 @@
 # VUE-MQTT-DEMO
 https://codesandbox.io/s/ecstatic-night-ssnni?file=/src/App.vue
+This demo uses a WSS connection to 8084 port
 
 ## Project setup
 ```
