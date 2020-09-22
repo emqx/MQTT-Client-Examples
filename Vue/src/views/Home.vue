@@ -161,7 +161,7 @@ export default {
     return {
       connection: {
         host: 'broker.emqx.io',
-        port: 8084,
+        port: 8083,
         endpoint: '/mqtt',
         clean: true, // 保留会话
         connectTimeout: 4000, // 超时时间
@@ -203,7 +203,7 @@ export default {
       // wxs 微信小程序连接
       // alis 支付宝小程序连接
       const { host, port, endpoint, ...options } = this.connection
-      const connectUrl = `wss://${host}:${port}${endpoint}`
+      const connectUrl = `ws://${host}:${port}${endpoint}`
       try {
         this.client = mqtt.connect(connectUrl, options)
       } catch (error) {
