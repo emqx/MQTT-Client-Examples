@@ -1,2 +1,2 @@
-# MQTT-Client-Example
-MQTT Client Example
+# MQTT-Client-Examples
+MQTT Client Examples
