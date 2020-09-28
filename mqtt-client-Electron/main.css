@@ -1,0 +1,17 @@
+.card.connection button {
+  border-radius: 0px;
+}
+.mqtt-sub-pub.columns {
+  padding: 24px;
+}
+.mqtt-sub-pub .card {
+  height: 432px;
+  overflow: scroll;
+}
+
+.select {
+  display: block;
+}
+.select select {
+  width: 100%;
+}
