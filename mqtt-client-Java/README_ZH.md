@@ -1,14 +1,14 @@
-# Java MQTT client examples
+# Java MQTT 客户端使用示例
 
-- MQTT client：[Eclipse Paho Java Client](https://github.com/eclipse/paho.mqtt.java)
-- Build tool：Maven
+- 客户端库：[Eclipse Paho Java Client](https://github.com/eclipse/paho.mqtt.java)
+- 构建工具：Maven
 
-## Compile
+## 编译
 ```
 mvn compile
 ``` 
 
-## Run
+## 运行
 ```bash
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample""
 
@@ -22,10 +22,10 @@ mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b ws://b
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b wss://broker.emqx.io:8084/mqtt"
 ```
 
-Args:
+参数：
 ```
 Args:
--h Help informatione
+-h Help information
 -b MQTT broker url [default: tcp://broker.emqx.io:1883]
 -a Publish/Subscribe action [default: publish]
 -u Username [default: emqx]

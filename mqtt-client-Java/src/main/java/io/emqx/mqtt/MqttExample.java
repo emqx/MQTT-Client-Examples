@@ -7,15 +7,13 @@ import java.io.IOException;
 public class MqttExample implements MqttCallback {
 
     public static void main(String[] args) {
-        String broker = "broker.emqx.io";
-        int port = 1883;
+        String broker = "tcp://broker.emqx.io:1883";
         int qos = 0;
         String action = "publish";
         String topic = "test/topic";
         String message = "Hello MQTT";
         String clientId = MqttClient.generateClientId();
         boolean cleanSession = true;
-        boolean ssl = false;
         String userName = "emqx";
         String password = "public";
         for (int i = 0; i < args.length; i++) {
@@ -44,14 +42,8 @@ public class MqttExample implements MqttCallback {
                     case 'q':
                         qos = Integer.parseInt(args[++i]);
                         break;
-                    case 'p':
-                        port = Integer.parseInt(args[++i]);
-                        break;
                     case 'c':
                         cleanSession = Boolean.parseBoolean(args[++i]);
-                        break;
-                    case 's':
-                        ssl = Boolean.parseBoolean(args[++i]);
                         break;
                     case 'u':
                         userName = args[++i];
@@ -82,14 +74,7 @@ public class MqttExample implements MqttCallback {
             return;
         }
 
-        String protocol = "tcp://";
-        if (ssl) {
-            protocol = "ssl://";
-        }
-
-        String brokerUrl = protocol + broker + ":" + port;
-
-        MqttExample sample = new MqttExample(brokerUrl, clientId, cleanSession, userName, password);
+        MqttExample sample = new MqttExample(broker, clientId, cleanSession, userName, password);
         try {
             if (action.equals("publish")) {
                 sample.publish(topic, qos, message.getBytes());
@@ -189,15 +174,13 @@ public class MqttExample implements MqttCallback {
         System.out.println(
                 "Args:\n" +
                         "-h Help information\n" +
-                        "-b MQTT server hostname or IP address [default: broker.emqx.io]\n" +
-                        "-p MQTT server port [default: 1883]\n" +
+                        "-b MQTT broker url [default: tcp://broker.emqx.io:1883]\n" +
                         "-a Publish/Subscribe action [default: publish]\n" +
                         "-u Username [default: emqx]\n" +
                         "-z Password [default: public]\n" +
                         "-c Clean session [default: true]\n" +
-                        "-t Publish/Subscribe topic\n" +
-                        "-q QoS [default: 0]\n" +
-                        "-s SSL [default: false]"
+                        "-t Publish/Subscribe topic [default: test/topic]\n" +
+                        "-q QoS [default: 0]"
         );
     }
 }
