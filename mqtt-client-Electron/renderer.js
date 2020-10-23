@@ -73,7 +73,7 @@ function onDisconnect () {
 function onSub () {
   if (client.connected) {
     const { topic, qos } = subscriber
-    client.subscribe(topic.value, parseInt(qos.value, 10), (error, res) => {
+    client.subscribe(topic.value, { qos: parseInt(qos.value, 10) }, (error, res) => {
        if (error) {
          console.error('Subscribe error: ', error)
        } else {

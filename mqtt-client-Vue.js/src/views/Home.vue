@@ -223,7 +223,7 @@ export default {
     // 订阅主题
     doSubscribe() {
       const { topic, qos } = this.subscription
-      this.client.subscribe(topic, qos, (error, res) => {
+      this.client.subscribe(topic, { qos }, (error, res) => {
         if (error) {
           console.log('Subscribe to topics error', error)
           return
