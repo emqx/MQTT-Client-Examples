@@ -1,0 +1,23 @@
+@import '~antd/dist/antd.css';
+
+.App {
+  background-color: #282c34;
+  min-height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App .ant-card {
+  width: 100%;
+  max-width: 850px;
+  margin-bottom: 20px;
+}
+
+.ant-form-inline .ant-form-item {
+  margin-bottom: 20px;
+}
