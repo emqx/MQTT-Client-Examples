@@ -19,13 +19,17 @@ public class Connection {
 
     private boolean tls;
 
+    private Context context;
 
-    public Connection(String host, int port, String clientId, String username, String password, boolean tls) {
+
+    public Connection(Context context, String host, int port, String clientId, String username, String password, boolean tls) {
+        this.context = context;
         this.host = host;
         this.port = port;
         this.clientId = clientId;
         this.username = username;
         this.password = password;
+        this.tls = tls;
     }
 
     public MqttAndroidClient getMqttAndroidClient(Context context) {
@@ -43,6 +47,14 @@ public class Connection {
     public MqttConnectOptions getMqttConnectOptions() {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(false);
+        if (tls) {
+            try {
+                options.setSocketFactory(SSLUtils.getSingleSocketFactory(context.getResources().openRawResource(R.raw.cacert)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
 
         if (!getUsername().isEmpty()) {
             options.setUserName(getUsername());
