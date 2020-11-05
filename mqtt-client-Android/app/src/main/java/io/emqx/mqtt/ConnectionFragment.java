@@ -1,9 +1,11 @@
 package io.emqx.mqtt;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -47,16 +49,18 @@ public class ConnectionFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 if (mButton.getText().toString().equals(getString(R.string.connect))) {
-                    Connection connection = new Connection(mHost.getText().toString(), Integer.parseInt(mPort.getText().toString()), mClientId.toString(), mUsername.toString(), mPassword.toString(), mTlsButton.isChecked());
+                    Connection connection = new Connection(fragmentActivity, mHost.getText().toString(), Integer.parseInt(mPort.getText().toString()), mClientId.getText().toString(), mUsername.getText().toString(), mPassword.getText().toString(), mTlsButton.isChecked());
                     ((MainActivity) fragmentActivity).connect(connection, new IMqttActionListener() {
                         @Override
                         public void onSuccess(IMqttToken asyncActionToken) {
+                            Log.d("ConnectionFragment", "Connected to: " + asyncActionToken.getClient().getServerURI());
                             updateButtonText();
                         }
 
                         @Override
                         public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-
+                            Toast.makeText(fragmentActivity, exception.toString(), Toast.LENGTH_SHORT).show();
+                            exception.printStackTrace();
                         }
                     });
                 } else {
