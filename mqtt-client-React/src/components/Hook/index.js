@@ -60,7 +60,7 @@ const HookMqtt = () => {
   const mqttPublish = (context) => {
     if (client) {
       const { topic, qos, payload } = context;
-      client.publish(topic, payload, qos, error => {
+      client.publish(topic, payload, { qos }, error => {
         if (error) {
           console.log('Publish error: ', error);
         }
