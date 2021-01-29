@@ -16,3 +16,8 @@ pip install paho-mqtt
 ```bash
 python3 pub_sub_tcp.py
 ``` 
+
+
+## Other
+[How to use MQTT in Python (Paho)](https://www.emqx.io/blog/how-to-use-mqtt-in-python)
+[Comparison of Python MQTT clients](https://www.emqx.io/blog/comparision-of-python-mqtt-client)
