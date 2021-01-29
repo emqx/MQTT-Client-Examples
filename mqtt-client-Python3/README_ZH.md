@@ -18,4 +18,6 @@ pip install paho-mqtt
 python3 pub_sub_tcp.py
 ``` 
 
+## 参阅
+[如何在 Python 中使用 MQTT](https://www.emqx.cn/blog/how-to-use-mqtt-in-python)
 

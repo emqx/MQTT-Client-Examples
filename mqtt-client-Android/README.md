@@ -1,7 +1,10 @@
-# Android 连接 MQTT 示例
+# Android MQTT Client Examples
 
- - 语言：Java
- - 客户端库：[Paho](https://github.com/eclipse/paho.mqtt.android)
+
+## Prerequisites
+* programing: Java
+* MQTT Client: [Paho](https://github.com/eclipse/paho.mqtt.android)
+
  
- ## 运行
- 在 Android Studio 中打开项目，连接虚拟机或设备，运行
+## Run
+Open the project in Android Studio, connect the virtual machine or device, and run
