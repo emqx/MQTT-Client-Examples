@@ -9,7 +9,7 @@ from paho.mqtt import client as mqtt_client
 
 BROKER = 'broker.emqx.io'
 PORT = 8084
-TOPIC = "/python-mqtt/wss"
+TOPIC = "python-mqtt/wss"
 # generate client ID with pub prefix randomly
 CLIENT_ID = "python-mqtt-wss-pub-sub-{id}".format(id=random.randint(0, 1000))
 USERNAME = 'emqx'
@@ -34,7 +34,7 @@ def on_message(client, userdata, msg):
 
 def connect_mqtt():
     client = mqtt_client.Client(CLIENT_ID, transport='websockets')
-    client.tls_set(ca_certs='./broker.emqx.io-ca.crt')
+    client.tls_set(ca_certs='./cn.emqx.cloud-ca.crt')
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect
     client.on_message = on_message
