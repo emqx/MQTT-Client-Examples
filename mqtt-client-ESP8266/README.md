@@ -15,6 +15,7 @@ Sketch -> Include Library -> Manage Libraries... -> Type PubSub in Search field 
 * esp_connect_mqtt.ino: ESP8266 connects to the MQTT broker
 * esp_mqtt_led.ino: ESP8266 control led
 * temp_hum.ino: getting started with the ESP8266 and DHT11 sensor 
+* esp_mqtt_moisture.ino: Soil Moisture Sensor example  
 
 
 ## Other

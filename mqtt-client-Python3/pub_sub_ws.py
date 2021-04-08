@@ -9,7 +9,7 @@ from paho.mqtt import client as mqtt_client
 
 BROKER = 'broker.emqx.io'
 PORT = 8083
-TOPIC = "/python-mqtt/ws"
+TOPIC = "python-mqtt/ws"
 # generate client ID with pub prefix randomly
 CLIENT_ID = "python-mqtt-ws-pub-sub-{id}".format(id=random.randint(0, 1000))
 USERNAME = 'emqx'
