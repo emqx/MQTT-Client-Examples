@@ -10,7 +10,7 @@ mvn compile
 
 ## Run
 ```bash
-mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample""
+mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample"
 
 # TLS
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b ssl://broker.emqx.io:8883"
@@ -25,9 +25,9 @@ mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b wss://
 Args:
 ```
 Args:
--h Help informatione
+-h Help information
 -b MQTT broker url [default: tcp://broker.emqx.io:1883]
--a Publish/Subscribe action [default: publish]
+-a publish/subscribe action [default: publish]
 -u Username [default: emqx]
 -z Password [default: public]
 -c Clean session [default: true]

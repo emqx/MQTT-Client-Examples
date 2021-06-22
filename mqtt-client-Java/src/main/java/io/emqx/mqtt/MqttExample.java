@@ -175,7 +175,7 @@ public class MqttExample implements MqttCallback {
                 "Args:\n" +
                         "-h Help information\n" +
                         "-b MQTT broker url [default: tcp://broker.emqx.io:1883]\n" +
-                        "-a Publish/Subscribe action [default: publish]\n" +
+                        "-a publish/subscribe action [default: publish]\n" +
                         "-u Username [default: emqx]\n" +
                         "-z Password [default: public]\n" +
                         "-c Clean session [default: true]\n" +
