@@ -284,12 +284,29 @@
    设置mqtt连接参数和用户名<br>
 
    ```c
-   //using ssl 
-   #define MQTT_BROKER_URI         "ssl:ge06f1e1.cn-shenzhen.emqx.cloud:15455"
-   //#define MQTT_BROKER_URI         "tcp://ge06f1e1.cn-shenzhen.emqx.cloud:15915
+   #define EMQX_Cloud_Professional_Version 1
+   #define EMQX_Cloud_TLS_SSL 1
+   
+   #if !EMQX_Cloud_Professional_Version
+   
+   #if EMQX_Cloud_TLS_SSL
+   #define MQTT_BROKER_URI         "ssl://ge06f1e1.cn-shenzhen.emqx.cloud:15455"
+   #else
+   #define MQTT_BROKER_URI         "tcp://ge06f1e1.cn-shenzhen.emqx.cloud:15915"
+   #endif
+   #else
+   
+   #if EMQX_Cloud_TLS_SSL
+   #define MQTT_BROKER_URI         "ssl://oba9d641.emqx.cloud:8883"
+   #else
+   #define MQTT_BROKER_URI         "tcp://oba9d641.emqx.cloud:1883"
+   #endif
+   
+   #endif
+   
    #define MQTT_CLIENTID_PREFIX    "rtthread-mqtt"
-   #define MQTT_USERNAME           "{USERNAME}"
-   #define MQTT_PASSWORD           "{PASSWORD}"
+   #define MQTT_USERNAME           "EMQX_RTT"
+   #define MQTT_PASSWORD           "emqx_rtt_0813"
    #define MQTT_SUBTOPIC           "/emqx/mqtt/sub"
    #define MQTT_PUBTOPIC           "/emqx/mqtt/pub"
    #define MQTT_WILLMSG            "Goodbye!"
@@ -301,27 +318,29 @@
    ```c
    mqtt_client_start()
    ```
-
+   
    也可在终端手动启动/停止<br>
-
+   
    ```shell
    mqtt_ctrl start
    mqtt_ctrl stop
    ```
-
+   
    若选择用户CA证书验证，则将CA证书(双向认证还需client.crt和client.key)放置到**packages/mbedtls-latest/certs**文件夹中<br>![image-20210814171042277](./snapshots/image-20210814171042277.png)
-
+   
    重新更新工程，会自动将证书内容复制到源文件中<br><img src="./snapshots/wechat_20210812163029.png" alt="wechat_20210812163029" style="zoom:60%;" />
-
+   
    构建项目并下载到目标板上![image-20210812165116098](./snapshots/image-20210812165116098.png)
-
+   
    打开终端Terminal可以看到运行日志<br>![image-20210813142338622](./snapshots/image-20210813142338622.png)
-
+   
    
 
 ## 使用[MQTTX](https://mqttx.app/zh)测试数据收发
 
-客户端连接配置<br>单向认证<br>![image-20210813142515940](./snapshots/image-20210813142515940.png)
+客户端连接配置<br>单向无证书认证<br>![image-20210813142515940](./snapshots/image-20210813142515940.png)
+
+单向自签名证书认证<br>![image-20210814181317020](./snapshots/image-20210814181317020.png)
 
 双向认证<br>![image-20210814172412786](./snapshots/image-20210814172412786.png)
 
@@ -416,10 +435,27 @@ mqtt_client.c
  * tcp://[fe80::20c:29ff:fe9a:a07e]:1883
  * ssl://[fe80::20c:29ff:fe9a:a07e]:1884
  */
-//using ssl
+
+#define EMQX_Cloud_Professional_Version 1
+#define EMQX_Cloud_TLS_SSL 1
+
+#if !EMQX_Cloud_Professional_Version
+
+#if EMQX_Cloud_TLS_SSL
 #define MQTT_BROKER_URI         "ssl://ge06f1e1.cn-shenzhen.emqx.cloud:15455"
-//just tcp
-//#define MQTT_BROKER_URI         "tcp://ge06f1e1.cn-shenzhen.emqx.cloud:15915"
+#else
+#define MQTT_BROKER_URI         "tcp://ge06f1e1.cn-shenzhen.emqx.cloud:15915"
+#endif
+#else
+
+#if EMQX_Cloud_TLS_SSL
+#define MQTT_BROKER_URI         "ssl://oba9d641.emqx.cloud:8883"
+#else
+#define MQTT_BROKER_URI         "tcp://oba9d641.emqx.cloud:1883"
+#endif
+
+#endif
+
 #define MQTT_CLIENTID_PREFIX    "rtthread-mqtt"
 #define MQTT_USERNAME           "EMQX_RTT"
 #define MQTT_PASSWORD           "emqx_rtt_0813"
