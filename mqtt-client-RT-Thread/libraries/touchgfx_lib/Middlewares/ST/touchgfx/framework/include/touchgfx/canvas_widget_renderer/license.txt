@@ -1,0 +1,51 @@
+****************************************************************************
+**                                                                        **
+**  The code in this folder is based on "The Lightweight Rasterizer"      **
+**  which in turn is based on project "Anti-Grain Geometry".              **
+**                                                                        **
+**  The Lightweight Rasterizer is available from                          **
+**                           http://www.antigrain.com/lite/agg2_lite.zip  **
+**                                                                        **
+**  You can read more about Anti-Grain Geometry on                        **
+**                                              http://www.antigrain.com  **
+**                                                                        **
+**  The code has been heavily modified for TouchGFX to allow the          **
+**  rasterizer to be used in embedded devices.                            **
+**                                                                        **
+**  Below you find the original copyright notice.                         **
+**                                                                        **
+****************************************************************************
+
+----------------------------------------------------------------------------
+Anti-Grain Geometry - Version 2.1 Lite
+Copyright (C) 2002-2003 Maxim Shemanarev (McSeem)
+
+Permission to copy, use, modify, sell and distribute this software
+is granted provided this copyright notice appears in all copies.
+This software is provided "as is" without express or implied
+warranty, and with no claim as to its suitability for any purpose.
+
+The author gratefully acknowleges the support of David Turner,
+Robert Wilhelm, and Werner Lemberg - the authors of the FreeType
+libray - in producing this work. See http:www.freetype.org for details.
+
+----------------------------------------------------------------------------
+Contact: mcseem@antigrain.com
+         mcseemagg@yahoo.com
+         http:www.antigrain.com
+----------------------------------------------------------------------------
+
+Class Outline - implementation.
+
+Initially the rendering algorithm was designed by David Turner and the
+other authors of the FreeType library - see the above notice. I nearly
+created a similar renderer, but still I was far from David's work.
+I completely redesigned the original code and adapted it for Anti-Grain
+ideas. Two functions - renderLine and renderScanline are the core of
+the algorithm - they calculate the exact coverage of each pixel cell
+of the polygon. I left these functions almost as is, because there's
+no way to improve the perfection - hats off to David and his group!
+
+All other code is very different from the original.
+
+----------------------------------------------------------------------------

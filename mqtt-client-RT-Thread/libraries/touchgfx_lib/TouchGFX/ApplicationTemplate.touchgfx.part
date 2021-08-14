@@ -1,0 +1,20 @@
+
+{
+  "Application": {
+    "Name": "art_pi",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "AvailableColorDepths": [ 24 ],
+    "AvailableLCDs":
+    {
+      "24": "LCD24bpp"
+    },
+    "AvailableResolutions" : [
+      {
+        "Width": 800,
+        "Height": 480
+      }
+    ],
+    "Family" : "STM32H7"
+  },
+  "Version": "4.15.0"
+}

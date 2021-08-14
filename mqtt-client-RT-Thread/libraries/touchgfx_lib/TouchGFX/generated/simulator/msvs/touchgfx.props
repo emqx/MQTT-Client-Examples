@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LocalDebuggerEnvironment>PATH=$(TouchGFXReleasePath)\lib\sdl\win32</LocalDebuggerEnvironment>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ApplicationRoot)\gui\include;$(ApplicationRoot)\generated\images\include;$(ApplicationRoot)\generated\bitmaps\include;$(ApplicationRoot)\generated\fonts\include;$(ApplicationRoot)\generated\texts\include;$(ApplicationRoot)\generated\gui_generated\include;$(ApplicationRoot)\generated\simulator\include;$(TouchGFXReleasePath)\framework\common\include;$(TouchGFXReleasePath)\framework\mvp\include;$(TouchGFXReleasePath)\framework\include\platform\hal\simulator\sdl\vendor\win32;$(TouchGFXReleasePath)\framework\platform\hal\simulator\sdl\3rdparty\sdl\include\win32;$(TouchGFXReleasePath)\framework\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(UseBPPOption)</AdditionalOptions>
+      <PreprocessorDefinitions>SIMULATOR;_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4355</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Link>
+      <AdditionalDependencies>$(TouchGFXReleasePath)\lib\sdl\win32\SDL.lib;$(TouchGFXReleasePath)\lib\sdl\win32\SDLmain.lib;$(TouchGFXReleasePath)\lib\sdl\win32\SDL_image.lib;$(TouchGFXReleasePath)\lib\win\msvs\libtouchgfx_$(PlatformToolset)_debug.lib;user32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:msvcrt.lib</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Link>
+      <AdditionalDependencies>$(TouchGFXReleasePath)\lib\sdl\win32\SDL.lib;$(TouchGFXReleasePath)\lib\sdl\win32\SDLmain.lib;$(TouchGFXReleasePath)\lib\sdl\win32\SDL_image.lib;$(TouchGFXReleasePath)\lib\win\msvs\libtouchgfx_$(PlatformToolset).lib;user32.lib;shell32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

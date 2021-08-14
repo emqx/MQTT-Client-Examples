@@ -1,0 +1,83 @@
+#-*- encoding: utf-8 -*-
+#---------------------------------------------------------------------------------
+# @File:   Sconscript for Package 
+# @Author: Copyright (c) 2018-2019, Shanghai Real-Thread Technology Co., Ltd 
+#---------------------------------------------------------------------------------
+import os
+from building import * 
+Import('RTT_ROOT')
+Import('rtconfig')
+
+#---------------------------------------------------------------------------------
+# Package configuration
+#---------------------------------------------------------------------------------
+PKGNAME = "Persimmon"
+VERSION = "unknown"
+DEPENDS = ["PKG_USING_PERSIMMON_SRC"]
+
+#---------------------------------------------------------------------------------
+# Compile the configuration 
+#---------------------------------------------------------------------------------
+SOURCES          = [] 
+
+LOCAL_CPPPATH    = [] 
+LOCAL_CCFLAGS    = "" 
+LOCAL_ASFLAGS    = ""
+
+CPPPATH          = [os.path.join(GetCurrentDir(), 'inc')] 
+
+CCFLAGS          = "" 
+ASFLAGS          = ""
+
+CPPDEFINES       = []
+LOCAL_CPPDEFINES = []
+
+LIBS             = ['Persimmon_3.0.0_armv7mfp_gcc']
+LIBPATH          = [os.path.join(GetCurrentDir(), 'libs')] 
+
+LINKFLAGS        = "" 
+
+#---------------------------------------------------------------------------------
+# Feature clip configuration, optional 
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# Compiler platform configuration, optional
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# System variables
+#---------------------------------------------------------------------------------
+objs   = [] 
+root   = GetCurrentDir() 
+
+#---------------------------------------------------------------------------------
+# Sub target
+#---------------------------------------------------------------------------------
+list = os.listdir(root)
+if GetDepend(DEPENDS):
+    for d in list:
+        path = os.path.join(root, d)
+        if os.path.isfile(os.path.join(path, 'SConscript')):
+            objs = objs + SConscript(os.path.join(d, 'SConscript')) 
+
+#---------------------------------------------------------------------------------
+# Main target
+#---------------------------------------------------------------------------------
+objs += DefineGroup(name = PKGNAME, src = SOURCES, depend = DEPENDS, 
+                   CPPPATH          = CPPPATH, 
+                   CCFLAGS          = CCFLAGS, 
+                   ASFLAGS          = ASFLAGS, 
+                   LOCAL_CPPPATH    = LOCAL_CPPPATH, 
+                   LOCAL_CCFLAGS    = LOCAL_CCFLAGS, 
+                   LOCAL_ASFLAGS    = LOCAL_ASFLAGS, 
+                   CPPDEFINES       = CPPDEFINES, 
+                   LOCAL_CPPDEFINES = LOCAL_CPPDEFINES, 
+                   LIBS             = LIBS, 
+                   LIBPATH          = LIBPATH,
+                   LINKFLAGS        = LINKFLAGS) 
+                   
+Return("objs") 
+#---------------------------------------------------------------------------------
+# End
+#---------------------------------------------------------------------------------

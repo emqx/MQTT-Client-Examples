@@ -1,0 +1,83 @@
+import os
+import rtconfig
+from building import *
+
+Import('SDK_LIB')
+
+cwd = GetCurrentDir()
+# add general drivers
+src = Split('''
+drv_common.c
+drv_usart.c
+drv_gpio.c
+drv_spi.c
+drv_sdio.c
+drv_wlan.c
+drv_sdram.c
+drv_lcd.c
+''')
+#CubeMX_Config/Src/stm32h7xx_hal_msp.c
+
+if GetDepend(['BSP_USING_ETH']):
+    src += Glob('drv_eth.c')
+
+if GetDepend(['BSP_USING_DCMI']):
+    src += Glob('drv_dcmi.c')
+
+if GetDepend(['BSP_USING_OV2640']):
+    src += Glob('drv_ov2640.c')
+
+if GetDepend(['BSP_USING_GC0328C']):
+    src += Glob('drv_gc0328c.c')
+
+if GetDepend(['BSP_USING_TIM']):
+    src += Glob('drv_hwtimer.c')
+    
+if GetDepend(['BSP_USING_SPI_LCD_ILI9488']):
+    src += Glob('drv_spi_ili9488.c')
+
+if GetDepend(['RT_USING_I2C', 'RT_USING_I2C_BITOPS']):
+    if GetDepend('BSP_USING_I2C1') or GetDepend('BSP_USING_I2C2') or GetDepend('BSP_USING_I2C3') or GetDepend('BSP_USING_I2C4'):
+        src += ['drv_soft_i2c.c'] 
+
+if GetDepend(['BSP_USING_ONCHIP_RTC']):
+    src += Glob('drv_rtc.c')
+	
+if GetDepend(['BSP_USING_USBD']):
+    src += Glob('drv_usbd.c')
+    
+if GetDepend(['BSP_USING_USBH']):
+    src += ['drv_usbh.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['drv_fdcan.c']
+
+if GetDepend(['RT_USING_PWM']):
+    src += ['drv_pwm.c']
+
+if GetDepend(['BSP_USING_SPI_FLASH']):
+    src += ['drv_spi_flash.c']
+
+if GetDepend(['BSP_USING_QSPI_FLASH']):
+    src += ['drv_qspi_flash.c']
+    src += ['drv_qspi.c']
+
+path = [cwd]
+path += [cwd + '/include']
+path += [cwd + '/include/config']
+
+startup_path_prefix = SDK_LIB
+
+#if rtconfig.CROSS_TOOL == 'gcc':
+#    src += [startup_path_prefix + '/STM32H7xx_HAL/CMSIS/Device/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h743xx.s']
+#elif rtconfig.CROSS_TOOL == 'keil':
+#    src += [startup_path_prefix + '/STM32H7xx_HAL/CMSIS/Device/ST/STM32H7xx/Source/Templates/arm/startup_stm32h743xx.s']
+#elif rtconfig.CROSS_TOOL == 'iar':
+#    src += [startup_path_prefix + '/STM32H7xx_HAL/CMSIS/Device/ST/STM32H7xx/Source/Templates/iar/startup_stm32h743xx.s']
+
+# STM32H743xx || STM32H750xx || STM32F753xx
+# You can select chips from the list above
+CPPDEFINES = ['STM32H750xx']
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

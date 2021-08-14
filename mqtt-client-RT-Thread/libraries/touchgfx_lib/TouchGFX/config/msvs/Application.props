@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <ImportGroup Label="PropertySheets"/>
+  <PropertyGroup Label="UserMacros">
+    <UseBPP>24</UseBPP>
+    <TouchGFXReleasePath>..\..\..\Middlewares\ST\touchgfx</TouchGFXReleasePath>
+    <TouchGFXEnvPath>E:\TouchGFX\4.15.0\env</TouchGFXEnvPath>
+    <ApplicationRoot>..\..</ApplicationRoot>
+  </PropertyGroup>
+  <PropertyGroup/>
+  <ItemDefinitionGroup/>
+  <ItemGroup>
+    <BuildMacro Include="UseBPP">
+      <Value>$(UseBPP)</Value>
+    </BuildMacro>
+    <BuildMacro Include="TouchGFXReleasePath">
+      <Value>$(TouchGFXReleasePath)</Value>
+    </BuildMacro>
+    <BuildMacro Include="TouchGFXEnvPath">
+      <Value>$(TouchGFXEnvPath)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ApplicationRoot">
+      <Value>$(ApplicationRoot)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

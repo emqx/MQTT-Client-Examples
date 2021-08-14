@@ -1,0 +1,12 @@
+from building import *
+
+src   = []
+cwd   = GetCurrentDir()
+path  = [cwd]
+
+if GetDepend('SAMPLES_USING_PWM'):
+    src += ['./pwm/pwm_sample.c']
+
+group = DefineGroup('peripheral-samples', src, depend = [''], CPPPATH = path)
+
+Return('group')
