@@ -41,7 +41,6 @@ board
 libraries
 packages
 rt-thread
-snapshots
 .config
 .config.old
 .cproject
