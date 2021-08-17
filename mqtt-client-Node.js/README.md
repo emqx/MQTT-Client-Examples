@@ -3,8 +3,6 @@
 In this example we provide example code for TCP, Websocket, TLS, and Websockets protocols to connect to the MQTT Broker.
 For more documentation on the use of the Javascript MQTT.js client, see the [Javascript Client - documentation](https://github.com/mqttjs/MQTT.js)
 
-
-
 ## Installation
 
 * Install Node.js and NPM
@@ -20,10 +18,10 @@ For more documentation on the use of the Javascript MQTT.js client, see the [Jav
 * Start
 
   ```bash
-  node index.js
+  npm start
+  // or use yarn
+  yarn start
   ```
-
-
 
 ## Usage
 
