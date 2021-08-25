@@ -1,0 +1,17 @@
+<!--index.wxml-->
+<view class="container">
+  <input class="weui-input" bindinput="setHost" value="{{ host }}" />
+  <view class="btns">
+    <button type="primary" bindtap="connect">{{ btnText }}</button>
+    <button type="warn" bindtap="disconnect" disabled="{{ btnText === '连接' }}">断开连接</button>
+  </view>
+  <input class="weui-input" bindinput="setTopic" value="{{ topic }}" />
+  <view class="btns">
+    <button type="primary" bindtap="subscribe">订阅</button>
+    <button type="warn" bindtap="unsubscribe">取消订阅</button>
+  </view>
+  <textarea bindinput="setMsg" value="{{ msg }}" />
+  <view class="btns">
+    <button type="primary" bindtap="publish">发布</button>
+  </view>
+</view>
