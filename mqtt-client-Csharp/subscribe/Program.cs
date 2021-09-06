@@ -6,10 +6,10 @@ namespace subscribe
 {
     class Program
     {
-        static MqttClient ConnectMQTT(string broker, int port, string clientId)
+        static MqttClient ConnectMQTT(string broker, int port, string clientId, string username, string password)
         {
             MqttClient client = new MqttClient(broker, port, false, MqttSslProtocols.None, null, null);
-            client.Connect(clientId);
+            client.Connect(clientId, username, password);
             if (client.IsConnected)
             {
                 Console.WriteLine("Connected to MQTT Broker");
@@ -36,7 +36,9 @@ namespace subscribe
             int port = 1883;
             string topic = "Csharp/mqtt";
             string clientId = Guid.NewGuid().ToString();
-            MqttClient client = ConnectMQTT(broker, port, clientId);
+            string username = "emqx";
+            string password = "public";
+            MqttClient client = ConnectMQTT(broker, port, clientId, username, password);
             Subscribe(client, topic);
         }
     }
