@@ -32,10 +32,9 @@ int main(void)
     /* enable auto reconnect on WLAN device */
     rt_wlan_config_autoreconnect(RT_TRUE);
 
-    rt_thread_mdelay(5000);
+    rt_thread_mdelay(10000);
+
     mqtt_client_start();
-
-
 
     for (;;)
     {

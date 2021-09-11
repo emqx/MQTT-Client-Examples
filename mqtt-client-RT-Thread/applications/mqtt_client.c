@@ -53,7 +53,7 @@
 #define TEST_DATA_SIZE          256
 #define PUB_CYCLE_TM            1000
 
-#define I2C_NAME    "i2c1"
+#define I2C_NAME    "i2c3"
 
 static rt_thread_t pub_thread_tid = RT_NULL;
 
@@ -64,7 +64,6 @@ static MQTTClient client;
 
 static rt_uint32_t pub_count = 0, sub_count = 0;
 static int recon_count = -1;
-static int start_tm = 0;
 static int is_started = 0;
 
 static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
@@ -177,11 +176,11 @@ static void thread_pub(void *parameter)
         rt_kprintf("no memory for pub_data\n");
         return;
     }
-    sht20_device_t dev = sht20_init(I2C_NAME);
-    rt_kprintf("sht20_device_t:    %p\n", dev);
 
-    start_tm = time((time_t *) RT_NULL);
-    rt_kprintf("test start at '%d'\r\n", start_tm);
+    sht20_device_t dev = sht20_init(I2C_NAME);
+    rt_kprintf("sht20_device_t init:   %p\n", dev);
+
+    rt_kprintf("test start at '%d'\r\n", time((time_t *) RT_NULL));
     float humidity = 0.0, temperature = 0.0;
 
     while (1)
@@ -194,11 +193,11 @@ static void thread_pub(void *parameter)
                 "  \"time\": \"%ld\", \n"
                 "  \"humidity\": \"%.2f\",\n"
                 "  \"temperature\": \"%.2f\"\n"
-                "}", pub_count,time(NULL), humidity, temperature);
+                "}", pub_count, time((time_t *) RT_NULL), humidity, temperature);
 
         rt_kprintf("%s\n", pub_data);
 
-        if (!paho_mqtt_publish(&client, QOS1, MQTT_PUBTOPIC, pub_data))
+        if (paho_mqtt_publish(&client, QOS1, MQTT_PUBTOPIC, pub_data) == 0)
         {
             ++pub_count;
         }
