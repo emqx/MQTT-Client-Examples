@@ -82,20 +82,18 @@ class Publisher : public QMQTT::Client
         // 定时发布消息, 消息发布100条以后关闭
         void onTimeout()
         {
-            // QMQTT::Message message(_number, EXAMPLE_TOPIC,
-            //         QString("Number is %1").arg(_number).toUtf8());
             QMQTT::Message message(_number, EXAMPLE_TOPIC,
                     QString("Number is %1").arg(_number).toUtf8());
             message.setQos(0);
-            // publish(message);
-
             std::cout << publish(message) << std::endl;
             _number++;
 
             if(_number >= 1000)
             {
+                // 停止发布消息定时器。
                 _timer.stop();
                 disconnectFromHost();
+                // 调用单次定时器关闭槽函数。
                 QTimer::singleShot(0, qApp, &QCoreApplication::quit);
             }
         }
@@ -177,7 +175,7 @@ int main(int argc, char** argv)
     if (!s.contains("sub") && !s.contains("pub")) {
 
         QTextStream qout(stdout);
-        qout<< "Unknown argument: " << s << endl;
+        qout<< "Unknown arguments: " << s << endl;
         std::cout << "Usage: qmqtt_example [pub | sub]" << std::endl;
         return -1;
     }
@@ -209,7 +207,7 @@ int main(int argc, char** argv)
        // 设置保活时间间隔
        subscriber.setKeepAlive(100);
        // 设置清空会话
-       subscriber.setCleanSession(false);
+       subscriber.setCleanSession(true);
        // 设置遗愿主题
        subscriber.setWillTopic("will/topic");
 
