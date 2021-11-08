@@ -13,6 +13,7 @@
 #include "drv_common.h"
 #include "mqtt_client.h"
 
+
 #define LED_PIN GET_PIN(I, 8)
 
 #define WIFI_SSID "LINKSYS_EMQX_IOT"
@@ -22,7 +23,6 @@ extern void wlan_autoconnect_init(void);
 
 int main(void)
 {
-    rt_uint32_t count = 1;
     rt_pin_mode(LED_PIN, PIN_MODE_OUTPUT);
 
     rt_wlan_connect(WIFI_SSID, WIFI_PASSWORD);
@@ -32,10 +32,11 @@ int main(void)
     /* enable auto reconnect on WLAN device */
     rt_wlan_config_autoreconnect(RT_TRUE);
 
-    rt_thread_mdelay(5000);
+    rt_thread_mdelay(10000);
+
     mqtt_client_start();
 
-    while (count++)
+    for (;;)
     {
         rt_thread_mdelay(500);
         rt_pin_write(LED_PIN, PIN_HIGH);
@@ -44,6 +45,7 @@ int main(void)
     }
 
     mqtt_client_stop();
+
     return RT_EOK;
 }
 

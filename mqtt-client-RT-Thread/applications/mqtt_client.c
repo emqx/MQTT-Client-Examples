@@ -3,8 +3,9 @@
 #include <stdint.h>
 
 #include <rtthread.h>
+#include <ulog.h>
 #include "paho_mqtt.h"
-
+#include "sht20.h"
 /**
  * MQTT URI farmat:
  * domain mode
@@ -19,15 +20,15 @@
  * ssl://[fe80::20c:29ff:fe9a:a07e]:1884
  */
 
-#define EMQX_Cloud_Professional_Version 1
+#define EMQX_Cloud_Professional_Version 0
 #define EMQX_Cloud_TLS_SSL 1
 
 #if !EMQX_Cloud_Professional_Version
 
 #if EMQX_Cloud_TLS_SSL
-#define MQTT_BROKER_URI         "ssl://ge06f1e1.cn-shenzhen.emqx.cloud:15455"
+#define MQTT_BROKER_URI         "ssl://ha9a03b0.cn-shenzhen.emqx.cloud:12699"
 #else
-#define MQTT_BROKER_URI         "tcp://ge06f1e1.cn-shenzhen.emqx.cloud:15915"
+#define MQTT_BROKER_URI         "tcp://ha9a03b0.cn-shenzhen.emqx.cloud:11762"
 #endif
 #else
 
@@ -40,10 +41,10 @@
 #endif
 
 #define MQTT_CLIENTID_PREFIX    "rtthread-mqtt"
-#define MQTT_USERNAME           "EMQX_RTT"
-#define MQTT_PASSWORD           "emqx_rtt_0813"
-#define MQTT_SUBTOPIC           "/emqx/mqtt/sub"
-#define MQTT_PUBTOPIC           "/emqx/mqtt/pub"
+#define MQTT_USERNAME           "test"
+#define MQTT_PASSWORD           "testemq"
+#define MQTT_SUBTOPIC           "/emqx/mqtt/rep"
+#define MQTT_PUBTOPIC           "/emqx/mqtt/req"
 #define MQTT_WILLMSG            "Goodbye!"
 #define MQTT_QOS                1
 #define MQTT_PUB_SUB_BUF_SIZE   1024
@@ -51,6 +52,8 @@
 #define CMD_INFO                "'mqtt_ctrl <start|stop>'"
 #define TEST_DATA_SIZE          256
 #define PUB_CYCLE_TM            1000
+
+#define I2C_NAME    "i2c3"
 
 static rt_thread_t pub_thread_tid = RT_NULL;
 
@@ -61,7 +64,6 @@ static MQTTClient client;
 
 static rt_uint32_t pub_count = 0, sub_count = 0;
 static int recon_count = -1;
-static int start_tm = 0;
 static int is_started = 0;
 
 static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
@@ -175,20 +177,34 @@ static void thread_pub(void *parameter)
         return;
     }
 
-    start_tm = time((time_t *) RT_NULL);
-    rt_kprintf("test start at '%d'\r\n", start_tm);
+    sht20_device_t dev = sht20_init(I2C_NAME);
+    rt_kprintf("sht20_device_t init:   %p\n", dev);
+
+    rt_kprintf("test start at '%d'\r\n", time((time_t *) RT_NULL));
+    float humidity = 0.0, temperature = 0.0;
 
     while (1)
     {
-        rt_snprintf(pub_data, TEST_DATA_SIZE, "Pub EMQX message-%d", pub_count);
+        humidity = sht20_read_humidity(dev);
+        temperature = sht20_read_temperature(dev);
 
-        if (!paho_mqtt_publish(&client, QOS1, MQTT_PUBTOPIC, pub_data))
+        snprintf(pub_data, TEST_DATA_SIZE, "{\n"
+                "  \"seq\": \"%u\",\n"
+                "  \"time\": \"%ld\", \n"
+                "  \"humidity\": \"%.2f\",\n"
+                "  \"temperature\": \"%.2f\"\n"
+                "}", pub_count, time((time_t *) RT_NULL), humidity, temperature);
+
+        rt_kprintf("%s\n", pub_data);
+
+        if (paho_mqtt_publish(&client, QOS1, MQTT_PUBTOPIC, pub_data) == 0)
         {
             ++pub_count;
         }
 
         rt_thread_delay(PUB_CYCLE_TM);
     }
+    sht20_deinit(dev);
 }
 
 void mqtt_client_start(void)
