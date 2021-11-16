@@ -1,0 +1,20 @@
+language: swift
+osx_image: xcode11.1
+
+before_install:
+    - wget https://www.emqx.io/downloads/broker/v3.2.7/emqx-macosx-v3.2.7.zip -O emqx.zip
+    - unzip emqx.zip
+    - brew install openssl
+    - emqx/bin/emqx start
+    - git clone https://github.com/hjianbo/xcode-coveralls --depth=1
+    - cd xcode-coveralls && git submodule init && git submodule update && cd ..
+    - xcodebuild -project xcode-coveralls/xcode-coveralls.xcodeproj -scheme xcode-coveralls DSTROOT=/ SYMROOT=build install | xcpretty
+
+before_script:
+    - carthage update --platform macOS
+
+script:
+    - set -o pipefail && xcodebuild -project CocoaMQTT.xcodeproj -scheme CocoaMQTT -derivedDataPath . build test | xcpretty
+
+after_success:
+    - bash coveralls.sh

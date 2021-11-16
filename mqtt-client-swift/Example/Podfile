@@ -1,0 +1,6 @@
+platform :ios, 10.0
+use_frameworks!
+
+target 'Example' do
+    pod 'CocoaMQTT/WebSockets', :path => '../'
+end
