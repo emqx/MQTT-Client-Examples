@@ -174,7 +174,8 @@ connect_cb(void *arg, nng_msg *msg)
     
     nng_socket sock     = *(nng_socket *) arg;
     uint8_t    ret_code = nng_mqtt_msg_get_connack_return_code(*msg*);
-    printf("%s: status: %d\n",__FUNCTION__, ret_code);
+	printf("%s: %s(%d)\n", __FUNCTION__,
+	    ret_code == 0 ? "connection established" : "connect failed", ret_code);
     
     nng_msg_free(msg);
     msg = NULL;
@@ -206,7 +207,7 @@ disconnect_cb(void *arg, nng_msg **msg*)
 
 > 本实例演示从初始INIT状态进入到RECV状态后进入数据接收状态
 >
-> RECV状态中获取收到的PUBLISH数据进行打印
+> RECV状态中获取收到的PUBLISH数据
 >
 > WAIT状态中进行清理nng_msg并重用，组装一个PUBLISH消息，设置SEND状态并进入发送回调
 >
@@ -221,16 +222,29 @@ client_cb(void *arg)
 	int          rv;
 
 	switch (work->state) {
+
 	case INIT:
 		work->state = RECV;
 		nng_ctx_recv(work->ctx, work->aio);
 		break;
+
 	case RECV:
 		if ((rv = nng_aio_result(work->aio)) != 0) {
 			fatal("nng_recv_aio", rv);
+			work->state = RECV;
+			nng_ctx_recv(work->ctx, work->aio);
+			break;
 		}
-		msg = nng_aio_get_msg(work->aio);
 
+		work->msg   = nng_aio_get_msg(work->aio);
+		work->state = WAIT;
+		nng_sleep_aio(0, work->aio);
+		break;
+
+	case WAIT:
+		msg = work->msg;
+
+		// Get PUBLISH payload and topic from msg;
 		uint32_t payload_len;
 		uint8_t *payload =
 		    nng_mqtt_msg_get_publish_payload(msg, &payload_len);
@@ -241,26 +255,29 @@ client_cb(void *arg)
 		printf("RECV: '%.*s' FROM: '%.*s'\n", payload_len,
 		    (char *) payload, topic_len, recv_topic);
 
-		work->msg   = msg;
-		work->state = WAIT;
-		nng_sleep_aio(1, work->aio);
-		break;
-	case WAIT:
+		uint8_t *send_data = nng_alloc(payload_len);
+		memcpy(send_data, payload, payload_len);
+
 		nng_msg_header_clear(work->msg);
 		nng_msg_clear(work->msg);
-		// Send message to another topic
 
-		char *topic = "/nanomq/msg/reply";
+		// Send payload to topic "/nanomq/msg/transfer"
+		char *topic = "/nanomq/msg/transfer";
 		nng_mqtt_msg_set_packet_type(work->msg, NNG_MQTT_PUBLISH);
 		nng_mqtt_msg_set_publish_topic(work->msg, topic);
 		nng_mqtt_msg_set_publish_payload(
-		    work->msg, (uint8_t *) topic, strlen(topic));
+		    work->msg, send_data, payload_len);
 
+		printf("SEND: '%.*s' TO:   '%s'\n", payload_len,
+		    (char *) send_data, topic);
+
+		nng_free(send_data, payload_len);
 		nng_aio_set_msg(work->aio, work->msg);
 		work->msg   = NULL;
 		work->state = SEND;
 		nng_ctx_send(work->ctx, work->aio);
 		break;
+
 	case SEND:
 		if ((rv = nng_aio_result(work->aio)) != 0) {
 			nng_msg_free(work->msg);
@@ -269,6 +286,7 @@ client_cb(void *arg)
 		work->state = RECV;
 		nng_ctx_recv(work->ctx, work->aio);
 		break;
+
 	default:
 		fatal("bad state!", NNG_ESTATE);
 		break;
