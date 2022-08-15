@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Mqtt Example</string>
+    <string name="connection">Connection</string>
+    <string name="subscription">Subscription</string>
+    <string name="publish">Publish</string>
+    <string name="message">Messages</string>
+    <string name="host">Host</string>
+    <string name="port">Port</string>
+    <string name="client_id">Client ID</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="tls_ssl">TLS/SSL</string>
+    <string name="true_str">True</string>
+    <string name="false_str">False</string>
+    <string name="topic">Topic</string>
+    <string name="payload">Payload</string>
+    <string name="qos">QoS</string>
+    <string name="retained">Retained</string>
+    <string name="subscribe">Subscribe</string>
+</resources>
