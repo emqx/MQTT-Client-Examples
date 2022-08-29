@@ -1,0 +1,125 @@
+<div class="home-container">
+  <mat-card class="configCard">
+    <div class="emq-title">Configuration</div>
+    <form class="config-form">
+      <mat-grid-list cols="4" rowHeight="4:1">
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Host</mat-label>
+            <input matInput [value]="connection.hostname" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Port</mat-label>
+            <input matInput type="number" [value]="connection.port" placeholder="8083/8084" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Mountpoint</mat-label>
+            <input matInput [value]="connection.path" placeholder="/mqtt" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Client ID</mat-label>
+            <input matInput [value]="connection.clientId" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Username</mat-label>
+            <input matInput [value]="connection.username" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Password</mat-label>
+            <input matInput [value]="connection.password" />
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </form>
+    <mat-grid-list cols="8" rowHeight="4:1">
+      <mat-grid-tile>
+        <button mat-raised-button color="primary" (click)="createConnection()">{{ isConnection ? 'Connected' : 'Connect' }}</button>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <button mat-raised-button color="warn" (click)="destroyConnection()" *ngIf="isConnection">Disconnect</button>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-card>
+
+  <mat-card class="subscriptionCard">
+    <div class="emq-title">Subscribe</div>
+    <form class="config-form">
+      <mat-grid-list cols="4" rowHeight="4:1">
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Topic</mat-label>
+            <input matInput [value]="subscription.topic" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>QoS</mat-label>
+            <mat-select [value]="subscription.qos">
+              <mat-option *ngFor="let item of qosList" [value]="item.value">
+                {{item.label}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </form>
+    <mat-grid-list cols="8" rowHeight="4:1">
+      <mat-grid-tile>
+        <button mat-raised-button color="primary" (click)="doSubscribe()">{{ subscribeSuccess ? 'Subscribed' : 'Subscribe' }}</button>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <button mat-raised-button color="warn" (click)="doUnSubscribe()" *ngIf="subscribeSuccess">Unsubscribe</button>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-card>
+
+  <mat-card class="publishCard">
+    <div class="emq-title">Publish</div>
+    <form class="config-form">
+      <mat-grid-list cols="4" rowHeight="4:1">
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Topic</mat-label>
+            <input matInput [value]="publish.topic" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>Payload</mat-label>
+            <input matInput [value]="publish.payload" />
+          </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+          <mat-form-field appearance="fill">
+            <mat-label>QoS</mat-label>
+            <mat-select [value]="subscription.qos">
+              <mat-option *ngFor="let item of qosList" [value]="item.value">
+                {{item.label}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </form>
+    <mat-grid-list cols="8" rowHeight="4:1">
+      <mat-grid-tile>
+        <button mat-raised-button color="primary" *ngIf="isConnection" (click)="doPublish()">{{ 'Publish' }}</button>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-card>
+
+  <mat-card class="receiveCard">
+    <div class="emq-title">Receive</div>
+    <textarea matInput [value]="receiveNews"></textarea>
+  </mat-card>
+</div>
