@@ -19,7 +19,7 @@ composer require php-mqtt/client
 ## Running
 
 ```bash
-python pubsub_tcp.php
+php pubsub_tcp.php
 ```
 
 ## Reference
