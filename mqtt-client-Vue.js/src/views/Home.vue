@@ -8,7 +8,17 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item prop="host" label="Host">
-              <el-input v-model="connection.host"></el-input>
+              <el-row :gutter="10">
+                <el-col :span="7">
+                  <el-select v-model="connection.protocol" @change="handleProtocolChange">
+                    <el-option label="ws://" value="ws"></el-option>
+                    <el-option label="wss://" value="wss"></el-option>
+                  </el-select>
+                </el-col>
+                <el-col :span="17">
+                  <el-input v-model="connection.host"></el-input>
+                </el-col>
+              </el-row>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -45,6 +55,7 @@
               style="margin-right: 20px;"
               :disabled="client.connected"
               @click="createConnection"
+              :loading="connecting"
             >
               {{ client.connected ? 'Connected' : 'Connect' }}
             </el-button>
@@ -117,18 +128,13 @@
           </el-col>
           <el-col :span="8">
             <el-form-item prop="payload" label="Payload">
-              <el-input v-model="publish.payload" size="small"></el-input>
+              <el-input v-model="publish.payload"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item prop="qos" label="QoS">
               <el-select v-model="publish.qos">
-                <el-option
-                  v-for="(item, index) in qosList"
-                  :key="index"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
+                <el-option v-for="qos in qosList" :key="qos" :label="qos" :value="qos"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -145,7 +151,7 @@
         Receive
       </div>
       <el-col :span="24">
-        <el-input type="textarea" :rows="3" style="margin-bottom: 15px" v-model="receiveNews"></el-input>
+        <el-input type="textarea" :rows="3" style="margin-bottom: 15px" v-model="receiveNews" readOnly></el-input>
       </el-col>
     </el-card>
   </div>
@@ -160,14 +166,21 @@ export default {
   data() {
     return {
       connection: {
+        protocol: 'ws',
         host: 'broker.emqx.io',
+        // ws: 8083; wss: 8084
         port: 8083,
         endpoint: '/mqtt',
-        clean: true, // 保留会话
-        connectTimeout: 4000, // 超时时间
-        reconnectPeriod: 4000, // 重连时间间隔
-        // 认证信息
-        clientId: 'mqttjs_3be2c321',
+        // for more options, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
+        clean: true,
+        connectTimeout: 30 * 1000, // ms
+        reconnectPeriod: 4000, // ms
+        clientId:
+          'emqx_vue_' +
+          Math.random()
+            .toString(16)
+            .substring(2, 8),
+        // auth
         username: 'emqx_test',
         password: 'emqx_test',
       },
@@ -181,46 +194,62 @@ export default {
         payload: '{ "msg": "Hello, I am browser." }',
       },
       receiveNews: '',
-      qosList: [
-        { label: 0, value: 0 },
-        { label: 1, value: 1 },
-        { label: 2, value: 2 },
-      ],
+      qosList: [0, 1, 2],
       client: {
         connected: false,
       },
       subscribeSuccess: false,
+      connecting: false,
+      retryTimes: 0,
     }
   },
   methods: {
-    // 创建连接
+    initData() {
+      this.client = {
+        connected: false,
+      }
+      this.retryTimes = 0
+      this.connecting = false
+      this.subscribeSuccess = false
+    },
+    handleOnReConnect() {
+      this.retryTimes += 1
+      if (this.retryTimes > 5) {
+        try {
+          this.client.end()
+          this.initData()
+          this.$message.error('Connection maxReconnectTimes limit, stop retry')
+        } catch (error) {
+          this.$message.error(error.toString())
+        }
+      }
+    },
     createConnection() {
-      // 连接字符串, 通过协议指定使用的连接方式
-      // ws 未加密 WebSocket 连接
-      // wss 加密 WebSocket 连接
-      // mqtt 未加密 TCP 连接
-      // mqtts 加密 TCP 连接
-      // wxs 微信小程序连接
-      // alis 支付宝小程序连接
-      const { host, port, endpoint, ...options } = this.connection
-      const connectUrl = `ws://${host}:${port}${endpoint}`
       try {
+        this.connecting = true
+        const { protocol, host, port, endpoint, ...options } = this.connection
+        const connectUrl = `${protocol}://${host}:${port}${endpoint}`
         this.client = mqtt.connect(connectUrl, options)
+        if (this.client.on) {
+          this.client.on('connect', () => {
+            this.connecting = false
+            console.log('Connection succeeded!')
+          })
+          this.client.on('reconnect', this.handleOnReConnect)
+          this.client.on('error', error => {
+            console.log('Connection failed', error)
+          })
+          this.client.on('message', (topic, message) => {
+            this.receiveNews = this.receiveNews.concat(message)
+            console.log(`Received message ${message} from topic ${topic}`)
+          })
+        }
       } catch (error) {
+        this.connecting = false
         console.log('mqtt.connect error', error)
       }
-      this.client.on('connect', () => {
-        console.log('Connection succeeded!')
-      })
-      this.client.on('error', error => {
-        console.log('Connection failed', error)
-      })
-      this.client.on('message', (topic, message) => {
-        this.receiveNews = this.receiveNews.concat(message)
-        console.log(`Received message ${message} from topic ${topic}`)
-      })
     },
-    // 订阅主题
+    // subscribe topic
     doSubscribe() {
       const { topic, qos } = this.subscription
       this.client.subscribe(topic, { qos }, (error, res) => {
@@ -232,7 +261,7 @@ export default {
         console.log('Subscribe to topics res', res)
       })
     },
-    // 取消订阅
+    // unsubscribe topic
     doUnSubscribe() {
       const { topic } = this.subscription
       this.client.unsubscribe(topic, error => {
@@ -241,7 +270,7 @@ export default {
         }
       })
     },
-    // 发送消息
+    // publish message
     doPublish() {
       const { topic, qos, payload } = this.publish
       this.client.publish(topic, payload, qos, error => {
@@ -250,19 +279,20 @@ export default {
         }
       })
     },
-    // 断开连接
+    // disconnect
     destroyConnection() {
       if (this.client.connected) {
         try {
           this.client.end()
-          this.client = {
-            connected: false,
-          }
+          this.initData()
           console.log('Successfully disconnected!')
         } catch (error) {
           console.log('Disconnect failed', error.toString())
         }
       }
+    },
+    handleProtocolChange(value) {
+      this.connection.port = value === 'wss' ? '8084' : '8083'
     },
   },
 }
