@@ -81,12 +81,7 @@
           <el-col :span="8">
             <el-form-item prop="qos" label="QoS">
               <el-select v-model="subscription.qos">
-                <el-option
-                  v-for="(item, index) in qosList"
-                  :key="index"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
+                <el-option v-for="qos in qosList" :key="qos" :label="qos" :value="qos"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -250,6 +245,7 @@ export default {
       }
     },
     // subscribe topic
+    // https://github.com/mqttjs/MQTT.js#mqttclientsubscribetopictopic-arraytopic-object-options-callback
     doSubscribe() {
       const { topic, qos } = this.subscription
       this.client.subscribe(topic, { qos }, (error, res) => {
@@ -262,6 +258,7 @@ export default {
       })
     },
     // unsubscribe topic
+    // https://github.com/mqttjs/MQTT.js#mqttclientunsubscribetopictopic-array-options-callback
     doUnSubscribe() {
       const { topic } = this.subscription
       this.client.unsubscribe(topic, error => {
@@ -271,21 +268,24 @@ export default {
       })
     },
     // publish message
+    // https://github.com/mqttjs/MQTT.js#mqttclientpublishtopic-message-options-callback
     doPublish() {
       const { topic, qos, payload } = this.publish
-      this.client.publish(topic, payload, qos, error => {
+      this.client.publish(topic, payload, { qos }, error => {
         if (error) {
           console.log('Publish error', error)
         }
       })
     },
     // disconnect
+    // https://github.com/mqttjs/MQTT.js#mqttclientendforce-options-callback
     destroyConnection() {
       if (this.client.connected) {
         try {
-          this.client.end()
-          this.initData()
-          console.log('Successfully disconnected!')
+          this.client.end(false, () => {
+            this.initData()
+            console.log('Successfully disconnected!')
+          })
         } catch (error) {
           console.log('Disconnect failed', error.toString())
         }
