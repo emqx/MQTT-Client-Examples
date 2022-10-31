@@ -1,3 +1,9 @@
 .DS_Store
-.idea
+.idea/
+.vscode
+.venv
 .metadata
+*.zip
+env.*
+env
+.pyc
