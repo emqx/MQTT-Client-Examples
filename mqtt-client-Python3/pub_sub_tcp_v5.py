@@ -3,12 +3,9 @@
 import json
 import random
 import time
-from tkinter import TOP
 
 import paho.mqtt.client as mqtt_client
 from paho.mqtt.client import MQTTv5
-from paho.mqtt.properties import Properties
-from paho.mqtt.packettypes import PacketTypes
 
 BROKER = '127.0.0.1'
 PORT = 1883
@@ -59,7 +56,7 @@ def publish(client):
             'msg': msg_count
         }
         msg = json.dumps(msg_dict)
-        result = client.publish(TOPIC, msg, qos=0)
+        result = client.publish(TOPIC, msg)
         result.wait_for_publish(1)
         if result.is_published():
             print("Sent `{msg}` to topic `{topic}`".format(msg=msg, topic=TOPIC))
