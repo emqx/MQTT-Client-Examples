@@ -7,7 +7,7 @@ import time
 import paho.mqtt.client as mqtt_client
 from paho.mqtt.client import MQTTv5
 
-BROKER = '127.0.0.1'
+BROKER = 'broker.emqx.io'
 PORT = 1883
 PROTOCOL = 5
 TOPIC = "python-mqtt/tcp"
