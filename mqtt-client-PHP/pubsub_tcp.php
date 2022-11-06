@@ -9,13 +9,13 @@ $server   = 'broker.emqx.io';
 $port     = 1883;
 $clientId = rand(5, 15);
 $username = 'emqx_user';
-$password = null;
+$password = 'public';
 $clean_session = false;
+$mqtt_version = MqttClient::MQTT_3_1_1;
 
-$connectionSettings  = new ConnectionSettings();
-$connectionSettings
+$connectionSettings  = (new ConnectionSettings)
   ->setUsername($username)
-  ->setPassword(null)
+  ->setPassword($password)
   ->setKeepAliveInterval(60)
   // Last Will 设置
   ->setLastWillTopic('emqx/test/last-will')
@@ -23,7 +23,7 @@ $connectionSettings
   ->setLastWillQualityOfService(1);
 
 
-$mqtt = new MqttClient($server, $port, $clientId);
+$mqtt = new MqttClient($server, $port, $clientId, $mqtt_version);
 
 $mqtt->connect($connectionSettings, $clean_session);
 printf("client connected\n");

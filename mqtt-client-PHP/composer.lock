@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "392f291891553f448a32c5853f54a7b2",
+    "content-hash": "45a8586d23e83dc429a60f58a16e10c1",
     "packages": [
         {
             "name": "bluerhinos/phpmqtt",
@@ -121,16 +121,16 @@
         },
         {
             "name": "php-mqtt/client",
-            "version": "v1.0.0",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mqtt/client.git",
-                "reference": "ca47fff0d5513c7ebeba8698e8ff8397414c38d4"
+                "reference": "22a207edef01d5f0ed3a6a79565cc425b678d786"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mqtt/client/zipball/ca47fff0d5513c7ebeba8698e8ff8397414c38d4",
-                "reference": "ca47fff0d5513c7ebeba8698e8ff8397414c38d4",
+                "url": "https://api.github.com/repos/php-mqtt/client/zipball/22a207edef01d5f0ed3a6a79565cc425b678d786",
+                "reference": "22a207edef01d5f0ed3a6a79565cc425b678d786",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -142,7 +142,7 @@
             "require": {
                 "myclabs/php-enum": "^1.7",
                 "php": "^7.4|^8.0",
-                "psr/log": "^1.1"
+                "psr/log": "^1.1|^2.0|^3.0"
             },
             "require-dev": {
                 "phpunit/php-invoker": "^3.0",
@@ -178,9 +178,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mqtt/client/issues",
-                "source": "https://github.com/php-mqtt/client/tree/v1.0.0"
+                "source": "https://github.com/php-mqtt/client/tree/v1.6.0"
             },
-            "time": "2021-01-10T18:42:03+00:00"
+            "time": "2022-11-01T20:00:19+00:00"
         },
         {
             "name": "psr/log",
@@ -240,16 +240,16 @@
         },
         {
             "name": "simps/mqtt",
-            "version": "v1.4.3",
+            "version": "v1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/simps/mqtt.git",
-                "reference": "b892566581edab1a398f5d7c0ad44a096492137d"
+                "reference": "7c4c2484cd59a50a6e4716545a8b6c3b65b30a90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/simps/mqtt/zipball/b892566581edab1a398f5d7c0ad44a096492137d",
-                "reference": "b892566581edab1a398f5d7c0ad44a096492137d",
+                "url": "https://api.github.com/repos/simps/mqtt/zipball/7c4c2484cd59a50a6e4716545a8b6c3b65b30a90",
+                "reference": "7c4c2484cd59a50a6e4716545a8b6c3b65b30a90",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -273,11 +273,6 @@
                 "ext-swoole": "The ext-swoole >= v4.4.20 or v4.5.3 needs to be loaded when using the MQTT Client."
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.4-dev"
-                }
-            },
             "autoload": {
                 "files": [
                     "src/constants.php"
@@ -311,7 +306,7 @@
             ],
             "support": {
                 "issues": "https://github.com/simps/mqtt/issues",
-                "source": "https://github.com/simps/mqtt/tree/v1.4.3"
+                "source": "https://github.com/simps/mqtt/tree/v1.4.4"
             },
             "funding": [
                 {
@@ -319,24 +314,24 @@
                     "type": "custom"
                 },
                 {
-                    "url": "https://github.com/simple-swoole",
+                    "url": "https://github.com/simps",
                     "type": "github"
                 }
             ],
-            "time": "2022-01-13T12:23:20+00:00"
+            "time": "2022-08-01T00:52:05+00:00"
         },
         {
             "name": "swoole/ide-helper",
-            "version": "4.8.9",
+            "version": "4.8.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swoole/ide-helper.git",
-                "reference": "8f82ba3b6af04a5bccb97c1654af992d1ee8b0fe"
+                "reference": "afe3a09f8c49a6011e2206a03e55e391d97d81b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/8f82ba3b6af04a5bccb97c1654af992d1ee8b0fe",
-                "reference": "8f82ba3b6af04a5bccb97c1654af992d1ee8b0fe",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/afe3a09f8c49a6011e2206a03e55e391d97d81b0",
+                "reference": "afe3a09f8c49a6011e2206a03e55e391d97d81b0",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -359,7 +354,7 @@
             "description": "IDE help files for Swoole.",
             "support": {
                 "issues": "https://github.com/swoole/ide-helper/issues",
-                "source": "https://github.com/swoole/ide-helper/tree/4.8.9"
+                "source": "https://github.com/swoole/ide-helper/tree/4.8.12"
             },
             "funding": [
                 {
@@ -371,7 +366,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-04-18T20:38:04+00:00"
+            "time": "2022-09-22T16:31:12+00:00"
         }
     ],
     "packages-dev": [],

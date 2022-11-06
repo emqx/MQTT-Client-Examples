@@ -4,26 +4,24 @@ require('vendor/autoload.php');
 
 use \PhpMqtt\Client\MqttClient;
 use \PhpMqtt\Client\ConnectionSettings;
-use \Bluerhinos\phpMQTT;
 
 $server   = 'broker.emqx.io';
 // TLS port
 $port     = 8883;
 $clientId = rand(5, 15);
 $username = 'emqx_user';
-$password = null;
+$password = 'public';
 $clean_session = false;
 
-$connectionSettings  = new ConnectionSettings();
-$connectionSettings
+$connectionSettings  = (new ConnectionSettings)
   ->setUsername($username)
-  ->setPassword(null)
+  ->setPassword($password)
   ->setKeepAliveInterval(60)
   ->setConnectTimeout(3)
   ->setUseTls(true)
   ->setTlsSelfSignedAllowed(true);
 
-$mqtt = new MqttClient($server, $port, $clientId);
+$mqtt = new MqttClient($server, $port, $clientId, MqttClient::MQTT_3_1_1);
 
 $mqtt->connect($connectionSettings, $clean_session);
 
