@@ -11,10 +11,10 @@
 #include <nng/mqtt/mqtt_client.h>
 #include <nng/nng.h>
 #include <nng/supplemental/util/platform.h>
-
-#ifdef NNG_SUPP_TLS
 #include <nng/supplemental/tls/tls.h>
 
+
+#ifdef NNG_SUPP_TLS
 static void loadfile(const char *path, void **datap, size_t *lenp);
 static int  init_dialer_tls(nng_dialer d, const char *cacert, const char *cert,
      const char *key, const char *pass);
@@ -150,7 +150,7 @@ connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 	printf("%s: connected[%d]!\n", __FUNCTION__, reason);
 
 	if (reason == 0) {
-		nng_socket *sock = arg;
+		nng_socket *       sock        = arg;
 		nng_mqtt_topic_qos topic_qos[] = {
 			{ .qos     = 0,
 			    .topic = { .buf = (uint8_t *) SUB_TOPIC1,
@@ -192,7 +192,7 @@ disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 }
 
 int
-client(const char *url)
+client(const char *url, uint8_t mqtt_version)
 {
 	nng_socket   sock;
 	nng_dialer   dialer;
@@ -200,7 +200,11 @@ client(const char *url)
 	int          i;
 	int          rv;
 
-	if ((rv = nng_mqtt_client_open(&sock)) != 0) {
+	rv = mqtt_version == MQTT_PROTOCOL_VERSION_v5
+	    ? nng_mqttv5_client_open(&sock)
+	    : nng_mqtt_client_open(&sock);
+
+	if (rv != 0) {
 		fatal("nng_socket", rv);
 	}
 
@@ -214,6 +218,7 @@ client(const char *url)
 	nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 	nng_mqtt_msg_set_connect_clean_session(msg, true);
+	nng_mqtt_msg_set_connect_proto_version(msg, mqtt_version);
 
 	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
 	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
@@ -385,7 +390,6 @@ tls_client(const char *url, const char *ca, const char *cert, const char *key,
 }
 #endif
 
-
 #if defined(NNG_SUPP_SQLITE)
 static int
 sqlite_config(
@@ -409,13 +413,13 @@ sqlite_config(
 }
 #endif
 
-
 void
 usage(void)
 {
 	printf("mqtt_async: \n");
 	printf("	-u <url> \n");
 	printf("	-n <number of works> (default: 32)\n");
+	printf("    -v <mqtt version> (default: 4)");
 #ifdef NNG_SUPP_TLS
 	printf("	-s enable ssl/tls mode (default: disable)\n");
 	printf("	-a <cafile path>\n");
@@ -432,21 +436,23 @@ main(int argc, char **argv)
 	char * path;
 	size_t file_len;
 
-	bool  enable_ssl = false;
-	char *url        = NULL;
-	char *cafile     = NULL;
-	char *cert       = NULL;
-	char *key        = NULL;
-	char *key_psw    = NULL;
+	bool    enable_ssl = false;
+	char *  url        = NULL;
+	char *  cafile     = NULL;
+	char *  cert       = NULL;
+	char *  key        = NULL;
+	char *  key_psw    = NULL;
+	uint8_t version    = 4;
 
 	int   opt;
 	int   digit_optind  = 0;
 	int   option_index  = 0;
-	char *short_options = "u:n:sa:c:k:p:W;";
+	char *short_options = "u:n:v:sa:c:k:p:W;";
 
 	static struct option long_options[] = {
 		{ "url", required_argument, NULL, 0 },
-		{ "nwork", no_argument, NULL, 'n' },
+		{ "nwork", required_argument, NULL, 0 },
+		{ "version", required_argument, NULL, 0 },
 		{ "ssl", no_argument, NULL, false },
 		{ "cafile", required_argument, NULL, 0 },
 		{ "cert", required_argument, NULL, 0 },
@@ -471,6 +477,9 @@ main(int argc, char **argv)
 			break;
 		case 'n':
 			nwork = atoi(argv[optind - 1]);
+			break;
+		case 'v':
+			version = atoi(argv[optind - 1]);
 			break;
 		case 's':
 			enable_ssl = true;
@@ -505,9 +514,8 @@ main(int argc, char **argv)
 #else
 		fprintf(stderr, "tls client: Not supported \n");
 #endif
-
 	} else {
-		client(url);
+		client(url, version);
 	}
 
 	return 0;
