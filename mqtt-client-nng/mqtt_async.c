@@ -138,51 +138,57 @@ alloc_work(nng_socket sock)
 }
 
 // Connack message callback function
-static void
-connect_cb(void *connect_arg, nng_msg *msg)
+void
+connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	// Mqtt subscribe array of topic with qos
-	nng_mqtt_topic_qos topic_qos[] = {
-		{ .qos     = 0,
-		    .topic = { .buf = (uint8_t *) SUB_TOPIC1,
-		        .length     = strlen(SUB_TOPIC1) } },
-		{ .qos     = 1,
-		    .topic = { .buf = (uint8_t *) SUB_TOPIC2,
-		        .length     = strlen(SUB_TOPIC2) } },
-		{ .qos     = 2,
-		    .topic = { .buf = (uint8_t *) SUB_TOPIC3,
-		        .length     = strlen(SUB_TOPIC3) } }
-	};
+	int reason = 0;
+	// get connect reason
+	nng_pipe_get_int(p, NNG_OPT_MQTT_CONNECT_REASON, &reason);
+	// get property for MQTT V5
+	// property *prop;
+	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_CONNECT_PROPERTY, &prop);
+	printf("%s: connected[%d]!\n", __FUNCTION__, reason);
 
-	size_t topic_qos_count =
-	    sizeof(topic_qos) / sizeof(nng_mqtt_topic_qos);
+	if (reason == 0) {
+		nng_socket *sock = arg;
+		nng_mqtt_topic_qos topic_qos[] = {
+			{ .qos     = 0,
+			    .topic = { .buf = (uint8_t *) SUB_TOPIC1,
+			        .length     = strlen(SUB_TOPIC1) } },
+			{ .qos     = 1,
+			    .topic = { .buf = (uint8_t *) SUB_TOPIC2,
+			        .length     = strlen(SUB_TOPIC2) } },
+			{ .qos     = 2,
+			    .topic = { .buf = (uint8_t *) SUB_TOPIC3,
+			        .length     = strlen(SUB_TOPIC3) } }
+		};
 
-	nng_socket sock     = *(nng_socket *) connect_arg;
-	uint8_t    ret_code = nng_mqtt_msg_get_connack_return_code(msg);
-	printf("%s: %s(%d)\n", __FUNCTION__,
-	    ret_code == 0 ? "connection established" : "connect failed", ret_code);
+		size_t topic_qos_count =
+		    sizeof(topic_qos) / sizeof(nng_mqtt_topic_qos);
 
-	nng_msg_free(msg);
-	msg = NULL;
-
-	if (ret_code == 0) {
 		// Connected succeed
-		nng_mqtt_msg_alloc(&msg, 0);
-		nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_SUBSCRIBE);
+		nng_msg *submsg;
+		nng_mqtt_msg_alloc(&submsg, 0);
+		nng_mqtt_msg_set_packet_type(submsg, NNG_MQTT_SUBSCRIBE);
 		nng_mqtt_msg_set_subscribe_topics(
-		    msg, topic_qos, topic_qos_count);
+		    submsg, topic_qos, topic_qos_count);
 
 		// Send subscribe message
-		nng_sendmsg(sock, msg, NNG_FLAG_NONBLOCK);
+		nng_sendmsg(*sock, submsg, NNG_FLAG_NONBLOCK);
 	}
 }
 
 // Disconnect message callback function
 static void
-disconnect_cb(void *disconn_arg, nng_msg *msg)
+disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	(void) disconn_arg;
-	printf("%s\n", __FUNCTION__);
+	int reason = 0;
+	// get connect reason
+	nng_pipe_get_int(p, NNG_OPT_MQTT_DISCONNECT_REASON, &reason);
+	// property *prop;
+	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_DISCONNECT_PROPERTY, &prop);
+	// nng_socket_get?
+	printf("%s: disconnected!\n", __FUNCTION__);
 }
 
 int
@@ -209,20 +215,14 @@ client(const char *url)
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 	nng_mqtt_msg_set_connect_clean_session(msg, true);
 
-	nng_mqtt_cb user_cb = {
-		.name            = "user_cb",
-		.on_connected    = connect_cb,
-		.on_disconnected = disconnect_cb,
-		.connect_arg     = &sock,
-		.disconn_arg     = "Args",
-	};
+	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
+	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
 
 	if ((rv = nng_dialer_create(&dialer, sock, url)) != 0) {
 		fatal("nng_dialer_create", rv);
 	}
 
 	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
-	nng_dialer_set_cb(dialer, &user_cb);
 	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
 
 	for (i = 0; i < nwork; i++) {
@@ -384,6 +384,31 @@ tls_client(const char *url, const char *ca, const char *cert, const char *key,
 	}
 }
 #endif
+
+
+#if defined(NNG_SUPP_SQLITE)
+static int
+sqlite_config(
+    nng_socket *sock, nng_mqtt_sqlite_option *sqlite, uint8_t proto_ver)
+{
+	int rv;
+
+	// set sqlite option
+	nng_mqtt_set_sqlite_enable(sqlite, true);
+	nng_mqtt_set_sqlite_flush_threshold(sqlite, 50);
+	nng_mqtt_set_sqlite_max_rows(sqlite, 500);
+	nng_mqtt_set_sqlite_db_dir(sqlite, "/tmp/nanomq");
+
+	// init sqlite db
+	nng_mqtt_sqlite_db_init(sqlite, "mqtt_client.db", proto_ver);
+
+	// set sqlite option pointer to socket
+	return nng_socket_set_ptr(*sock, NNG_OPT_MQTT_SQLITE, sqlite);
+
+	return (0);
+}
+#endif
+
 
 void
 usage(void)
