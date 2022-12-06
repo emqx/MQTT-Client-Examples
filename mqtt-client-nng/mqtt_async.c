@@ -321,34 +321,6 @@ connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_CONNECT_PROPERTY, &prop);
 	printf("%s: connected[%d]!\n", __FUNCTION__, reason);
-
-	if (reason == 0) {
-		nng_socket *       sock        = arg;
-		nng_mqtt_topic_qos topic_qos[] = {
-			{ .qos     = 0,
-			    .topic = { .buf = (uint8_t *) SUB_TOPIC1,
-			        .length     = strlen(SUB_TOPIC1) } },
-			{ .qos     = 1,
-			    .topic = { .buf = (uint8_t *) SUB_TOPIC2,
-			        .length     = strlen(SUB_TOPIC2) } },
-			{ .qos     = 2,
-			    .topic = { .buf = (uint8_t *) SUB_TOPIC3,
-			        .length     = strlen(SUB_TOPIC3) } }
-		};
-
-		size_t topic_qos_count =
-		    sizeof(topic_qos) / sizeof(nng_mqtt_topic_qos);
-
-		// Connected succeed
-		nng_msg *submsg;
-		nng_mqtt_msg_alloc(&submsg, 0);
-		nng_mqtt_msg_set_packet_type(submsg, NNG_MQTT_SUBSCRIBE);
-		nng_mqtt_msg_set_subscribe_topics(
-		    submsg, topic_qos, topic_qos_count);
-
-		// Send subscribe message
-		nng_sendmsg(*sock, submsg, NNG_FLAG_NONBLOCK);
-	}
 }
 
 // Disconnect message callback function
@@ -361,6 +333,30 @@ disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_DISCONNECT_PROPERTY, &prop);
 	printf("%s: disconnected!\n", __FUNCTION__);
+}
+
+static void
+sub_callback(void *arg)
+{
+	nng_mqtt_client *client = (nng_mqtt_client *) arg;
+	nng_aio *        aio    = client->sub_aio;
+	nng_msg *        msg    = nng_aio_get_msg(aio);
+
+	// Do not forget to judge if msg is NULL or not
+	if (msg != NULL) {
+		uint32_t count = 0;
+		uint8_t *codes;
+		codes = (uint8_t *) nng_mqtt_msg_get_suback_return_codes(
+		    msg, &count);
+
+		printf("%s: suback: ", __FUNCTION__);
+		for (uint32_t i = 0; i < count; i++) {
+			printf("[%d] ", codes[i]);
+		}
+		printf("\n");
+
+		nng_msg_free(msg);
+	}
 }
 
 int
@@ -421,6 +417,32 @@ client(client_opts *opts)
 
 	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
 	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
+
+	// subscribe to mqtt broker
+	nng_mqtt_topic_qos subscriptions[] = {
+			{
+			    .qos   = 1,
+			    .topic = { 
+					.buf    = (uint8_t *) SUB_TOPIC1,
+			        .length = strlen(SUB_TOPIC1), 
+				},
+			},
+			{
+			    .qos   = 2,
+			    .topic = { 
+					.buf    = (uint8_t *) SUB_TOPIC2,
+			        .length = strlen(SUB_TOPIC2), 
+				},
+			},
+		};
+
+	nng_mqtt_cb_opt cb_opt = {
+		.sub_ack_cb = sub_callback,
+	};
+
+	nng_mqtt_client *client = nng_mqtt_client_alloc(&sock, &cb_opt, true);
+	nng_mqtt_subscribe_async(client, subscriptions,
+	    sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
 
 	for (i = 0; i < opts->parallel; i++) {
 		client_cb(works[i]);
@@ -536,16 +558,19 @@ usage(void)
 {
 	printf("mqtt_async: \n");
 	printf("    -h, --help    \n");
-	printf("    --url <url>   \n");
-	printf("    -n, --parallel <number of works> (default: 32)\n");
-	printf("    -v, --version  <mqtt version> (default: 4)\n");
-	printf("    --sqlite  enable sqlite cache (default: false)\n");
-	printf(
-	    "    -s, --secure   enable ssl/tls mode (default: disable)\n");
-	printf("    --cacert       <cafile path>\n");
-	printf("    -E, --cert     <cert file path>\n");
-	printf("    --key          <key file path>\n");
-	printf("    --pey_pass     <key password>\n");
+	printf("    --url            <url>    The url for mqtt broker \n"
+	       "                     ('mqtt-tcp://host:port' or \n"
+	       "                     'tls+mqtt-tcp://host:port')\n"
+	       "                     [default: "
+	       "mqtt-tcp://127.0.0.1:1883]\n");
+	printf("    -n, --parallel   <number of works> (default: 32)\n");
+	printf("    -v, --version    <mqtt version> (default: 4)\n");
+	printf("    --sqlite         enable sqlite cache (default: false)\n");
+	printf("    -s, --secure     enable ssl/tls mode (default: disable)\n");
+	printf("    --cacert         <cafile path>\n");
+	printf("    -E, --cert       <cert file path>\n");
+	printf("    --key            <key file path>\n");
+	printf("    --pey_pass       <key password>\n");
 }
 
 int
