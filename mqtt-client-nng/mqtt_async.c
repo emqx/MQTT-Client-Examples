@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <errno.h>
-#include <getopt.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,15 +12,164 @@
 #include <nng/nng.h>
 #include <nng/supplemental/util/platform.h>
 #include <nng/supplemental/tls/tls.h>
+#include <nng/supplemental/util/options.h>
 
+static void
+fatal(const char *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	vfprintf(stderr, msg, ap);
+	va_end(ap);
+	fprintf(stderr, "\n");
+	exit(1);
+}
 
-#ifdef NNG_SUPP_TLS
+#define ASSERT_NULL(p, fmt, ...)           \
+	if ((p) != NULL) {                 \
+		fatal(fmt, ##__VA_ARGS__); \
+	}
+
+typedef struct {
+	size_t  parallel;
+	uint8_t version;
+	char *  url;
+	bool    enable_ssl;
+	char *  cacert;
+	size_t  cacert_len;
+	char *  cert;
+	size_t  cert_len;
+	char *  key;
+	size_t  key_len;
+	char *  keypass;
+} client_opts;
+
+enum options {
+	OPT_HELP = 1,
+	OPT_VERSION,
+	OPT_PARALLEL,
+	OPT_URL,
+	OPT_SECURE,
+	OPT_CACERT,
+	OPT_CERTFILE,
+	OPT_KEYFILE,
+	OPT_KEYPASS,
+};
+
+static nng_optspec cmd_opts[] = {
+	{ .o_name = "help", .o_short = 'h', .o_val = OPT_HELP },
+	{ .o_name    = "parallel",
+	    .o_short = 'n',
+	    .o_val   = OPT_PARALLEL,
+	    .o_arg   = true },
+	{ .o_name    = "version",
+	    .o_short = 'V',
+	    .o_val   = OPT_VERSION,
+	    .o_arg   = true },
+	{ .o_name = "url", .o_val = OPT_URL, .o_arg = true },
+	{ .o_name = "secure", .o_short = 's', .o_val = OPT_SECURE },
+	{ .o_name = "cacert", .o_val = OPT_CACERT, .o_arg = true },
+	{ .o_name = "key", .o_val = OPT_KEYFILE, .o_arg = true },
+	{ .o_name = "keypass", .o_val = OPT_KEYPASS, .o_arg = true },
+	{
+	    .o_name  = "cert",
+	    .o_short = 'E',
+	    .o_val   = OPT_CERTFILE,
+	    .o_arg   = true,
+	},
+};
+
+static void usage(void);
 static void loadfile(const char *path, void **datap, size_t *lenp);
 static int  init_dialer_tls(nng_dialer d, const char *cacert, const char *cert,
      const char *key, const char *pass);
-#endif
 
-static size_t nwork = 32;
+int
+client_parse_opts(int argc, char **argv, client_opts *opt)
+{
+	int    idx = 1;
+	char * arg;
+	int    val;
+	int    rv;
+
+	while ((rv = nng_opts_parse(argc, argv, cmd_opts, &val, &arg, &idx)) ==
+	    0) {
+		switch (val) {
+		case OPT_HELP:
+			usage();
+			exit(0);
+			break;
+		case OPT_PARALLEL:
+			opt->parallel = atol(arg);
+			break;
+		case OPT_VERSION:
+			opt->version = atol(arg);
+			break;
+		case OPT_URL:
+			ASSERT_NULL(opt->url,
+			    "URL (--url) may be specified "
+			    "only once.");
+			opt->url = nng_strdup(arg);
+			break;
+		case OPT_SECURE:
+			opt->enable_ssl = true;
+			break;
+		case OPT_CACERT:
+			ASSERT_NULL(opt->cacert,
+			    "CA Certificate (--cacert) may be "
+			    "specified only once.");
+			loadfile(
+			    arg, (void **) &opt->cacert, &opt->cacert_len);
+			break;
+		case OPT_CERTFILE:
+			ASSERT_NULL(opt->cert,
+			    "Cert (--cert) may be specified "
+			    "only once.");
+			loadfile(arg, (void **) &opt->cert, &opt->cert_len);
+			break;
+		case OPT_KEYFILE:
+			ASSERT_NULL(opt->key,
+			    "Key (--key) may be specified only once.");
+			loadfile(arg, (void **) &opt->key, &opt->key_len);
+			break;
+		case OPT_KEYPASS:
+			ASSERT_NULL(opt->keypass,
+			    "Key Password (--keypass) may be specified only "
+			    "once.");
+			opt->keypass = nng_strdup(arg);
+			break;
+		}
+	}
+
+	switch (rv) {
+	case NNG_EINVAL:
+		fatal("Option %s is invalid.", argv[idx]);
+		usage();
+		break;
+	case NNG_EAMBIGUOUS:
+		fatal("Option %s is ambiguous (specify in full).", argv[idx]);
+		break;
+	case NNG_ENOARG:
+		fatal("Option %s requires argument.", argv[idx]);
+		break;
+	default:
+		break;
+	}
+
+	if (opt->url == NULL) {
+		opt->url = nng_strdup("mqtt-tcp://127.0.0.1:1883");
+	}
+
+	if (opt->version == 0) {
+		opt->version = MQTT_PROTOCOL_VERSION_v311;
+	}
+
+	if (opt->parallel == 0 ) {
+		opt->parallel = 32;
+	}
+
+	return rv;
+}
 
 struct work {
 	enum { INIT, RECV, WAIT, SEND } state;
@@ -32,12 +181,6 @@ struct work {
 #define SUB_TOPIC1 "/nanomq/msg/1"
 #define SUB_TOPIC2 "/nanomq/msg/2"
 #define SUB_TOPIC3 "/nanomq/msg/3"
-
-void
-fatal(const char *msg, int rv)
-{
-	fprintf(stderr, "%s: %s\n", msg, nng_strerror(rv));
-}
 
 void
 client_cb(void *arg)
@@ -55,7 +198,7 @@ client_cb(void *arg)
 
 	case RECV:
 		if ((rv = nng_aio_result(work->aio)) != 0) {
-			fatal("nng_recv_aio", rv);
+			fatal("nng_recv_aio: %s", nng_strerror(rv));
 			work->state = RECV;
 			nng_ctx_recv(work->ctx, work->aio);
 			break;
@@ -106,14 +249,14 @@ client_cb(void *arg)
 	case SEND:
 		if ((rv = nng_aio_result(work->aio)) != 0) {
 			nng_msg_free(work->msg);
-			fatal("nng_send_aio", rv);
+			fatal("nng_send_aio: %s", nng_strerror(rv));
 		}
 		work->state = RECV;
 		nng_ctx_recv(work->ctx, work->aio);
 		break;
 
 	default:
-		fatal("bad state!", NNG_ESTATE);
+		fatal("bad state: %s", nng_strerror(NNG_ESTATE));
 		break;
 	}
 }
@@ -125,13 +268,13 @@ alloc_work(nng_socket sock)
 	int          rv;
 
 	if ((w = nng_alloc(sizeof(*w))) == NULL) {
-		fatal("nng_alloc", NNG_ENOMEM);
+		fatal("nng_alloc: %s", nng_strerror( NNG_ENOMEM));
 	}
 	if ((rv = nng_aio_alloc(&w->aio, client_cb, w)) != 0) {
-		fatal("nng_aio_alloc", rv);
+		fatal("nng_aio_alloc: %s", nng_strerror(rv));
 	}
 	if ((rv = nng_ctx_open(&w->ctx, sock)) != 0) {
-		fatal("nng_ctx_open", rv);
+		fatal("nng_ctx_open: %s", nng_strerror(rv));
 	}
 	w->state = INIT;
 	return (w);
@@ -187,28 +330,29 @@ disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 	nng_pipe_get_int(p, NNG_OPT_MQTT_DISCONNECT_REASON, &reason);
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_DISCONNECT_PROPERTY, &prop);
-	// nng_socket_get?
 	printf("%s: disconnected!\n", __FUNCTION__);
 }
 
 int
-client(const char *url, uint8_t mqtt_version)
+client(client_opts *opts)
 {
 	nng_socket   sock;
 	nng_dialer   dialer;
-	struct work *works[nwork];
+	struct work *works[opts->parallel];
 	int          i;
 	int          rv;
 
-	rv = mqtt_version == MQTT_PROTOCOL_VERSION_v5
+	rv = opts->version == MQTT_PROTOCOL_VERSION_v5
 	    ? nng_mqttv5_client_open(&sock)
 	    : nng_mqtt_client_open(&sock);
 
+	printf("connecting to %s\n", opts->url);
+
 	if (rv != 0) {
-		fatal("nng_socket", rv);
+		fatal("nng_socket: %s", nng_strerror(rv));
 	}
 
-	for (i = 0; i < nwork; i++) {
+	for (i = 0; i < opts->parallel; i++) {
 		works[i] = alloc_work(sock);
 	}
 
@@ -218,19 +362,26 @@ client(const char *url, uint8_t mqtt_version)
 	nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 	nng_mqtt_msg_set_connect_clean_session(msg, true);
-	nng_mqtt_msg_set_connect_proto_version(msg, mqtt_version);
+	nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
 
 	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
 	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
 
-	if ((rv = nng_dialer_create(&dialer, sock, url)) != 0) {
-		fatal("nng_dialer_create", rv);
+	if ((rv = nng_dialer_create(&dialer, sock, opts->url)) != 0) {
+		fatal("nng_dialer_create: %s", nng_strerror(rv));
+	}
+
+	if (opts->enable_ssl) {
+		if ((rv = init_dialer_tls(dialer, opts->cacert, opts->cert,
+		         opts->key, opts->keypass)) != 0) {
+			fatal("init_dialer_tls: %s", nng_strerror(rv));
+		}
 	}
 
 	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
 	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
 
-	for (i = 0; i < nwork; i++) {
+	for (i = 0; i < opts->parallel; i++) {
 		client_cb(works[i]);
 	}
 
@@ -239,7 +390,6 @@ client(const char *url, uint8_t mqtt_version)
 	}
 }
 
-#ifdef NNG_SUPP_TLS
 // This reads a file into memory.  Care is taken to ensure that
 // the buffer is one byte larger and contains a terminating
 // NUL. (Useful for key files and such.)
@@ -329,66 +479,13 @@ init_dialer_tls(nng_dialer d, const char *cacert, const char *cert,
 		}
 	}
 
-	rv = nng_dialer_setopt_ptr(d, NNG_OPT_TLS_CONFIG, cfg);
+	rv = nng_dialer_set_ptr(d, NNG_OPT_TLS_CONFIG, cfg);
 
 out:
 	nng_tls_config_free(cfg);
 	return (rv);
 }
 
-int
-tls_client(const char *url, const char *ca, const char *cert, const char *key,
-    const char *pass)
-{
-	nng_socket   sock;
-	nng_dialer   dialer;
-	struct work *works[nwork];
-	int          i;
-	int          rv;
-
-	if ((rv = nng_mqtt_client_open(&sock)) != 0) {
-		fatal("nng_socket", rv);
-	}
-
-	for (i = 0; i < nwork; i++) {
-		works[i] = alloc_work(sock);
-	}
-	// Mqtt connect message
-	nng_msg *msg;
-	nng_mqtt_msg_alloc(&msg, 0);
-	nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
-	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
-	nng_mqtt_msg_set_connect_clean_session(msg, true);
-
-	nng_mqtt_cb user_cb = {
-		.name            = "user_cb",
-		.on_connected    = connect_cb,
-		.on_disconnected = disconnect_cb,
-		.connect_arg     = &sock,
-		.disconn_arg     = "Args",
-	};
-
-	if ((rv = nng_dialer_create(&dialer, sock, url)) != 0) {
-		fatal("nng_dialer_create", rv);
-	}
-
-	if ((rv = init_dialer_tls(dialer, ca, cert, key, pass)) != 0) {
-		fatal("init_dialer_tls", rv);
-	}
-
-	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
-	nng_dialer_set_cb(dialer, &user_cb);
-	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
-
-	for (i = 0; i < nwork; i++) {
-		client_cb(works[i]);
-	}
-
-	for (;;) {
-		nng_msleep(3600000); // neither pause() nor sleep() portable
-	}
-}
-#endif
 
 #if defined(NNG_SUPP_SQLITE)
 static int
@@ -413,110 +510,32 @@ sqlite_config(
 }
 #endif
 
-void
+static void
 usage(void)
 {
 	printf("mqtt_async: \n");
-	printf("	-u <url> \n");
-	printf("	-n <number of works> (default: 32)\n");
-	printf("    -v <mqtt version> (default: 4)");
-#ifdef NNG_SUPP_TLS
-	printf("	-s enable ssl/tls mode (default: disable)\n");
-	printf("	-a <cafile path>\n");
-	printf("	-c <cert file path>\n");
-	printf("	-k <key file path>\n");
-	printf("	-p <key password>\n");
-#endif
+	printf("    -h, --help    \n");
+	printf("    --url <url>   \n");
+	printf("    -n, --parallel <number of works> (default: 32)\n");
+	printf("    -v, --version  <mqtt version> (default: 4)\n");
+	printf(
+	    "    -s, --secure   enable ssl/tls mode (default: disable)\n");
+	printf("    --cacert       <cafile path>\n");
+	printf("    -E, --cert     <cert file path>\n");
+	printf("    --key          <key file path>\n");
+	printf("    --pey_pass     <key password>\n");
 }
 
 int
 main(int argc, char **argv)
 {
 	int    rc;
-	char * path;
-	size_t file_len;
 
-	bool    enable_ssl = false;
-	char *  url        = NULL;
-	char *  cafile     = NULL;
-	char *  cert       = NULL;
-	char *  key        = NULL;
-	char *  key_psw    = NULL;
-	uint8_t version    = 4;
+	client_opts opts = { 0 };
 
-	int   opt;
-	int   digit_optind  = 0;
-	int   option_index  = 0;
-	char *short_options = "u:n:v:sa:c:k:p:W;";
+	client_parse_opts(argc, argv, &opts);
 
-	static struct option long_options[] = {
-		{ "url", required_argument, NULL, 0 },
-		{ "nwork", required_argument, NULL, 0 },
-		{ "version", required_argument, NULL, 0 },
-		{ "ssl", no_argument, NULL, false },
-		{ "cafile", required_argument, NULL, 0 },
-		{ "cert", required_argument, NULL, 0 },
-		{ "key", required_argument, NULL, 0 },
-		{ "psw", required_argument, NULL, 0 },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
-	};
-
-	while ((opt = getopt_long(argc, argv, short_options, long_options,
-	            &option_index)) != -1) {
-		switch (opt) {
-		case 0:
-			// TODO
-			break;
-		case '?':
-		case 'h':
-			usage();
-			exit(0);
-		case 'u':
-			url = argv[optind - 1];
-			break;
-		case 'n':
-			nwork = atoi(argv[optind - 1]);
-			break;
-		case 'v':
-			version = atoi(argv[optind - 1]);
-			break;
-		case 's':
-			enable_ssl = true;
-			break;
-#ifdef NNG_SUPP_TLS
-		case 'a':
-			path = argv[optind - 1];
-			loadfile(path, (void **) &cafile, &file_len);
-			break;
-		case 'c':
-			path = argv[optind - 1];
-			loadfile(path, (void **) &cert, &file_len);
-			break;
-		case 'k':
-			path = argv[optind - 1];
-			loadfile(path, (void **) &key, &file_len);
-			break;
-		case 'p':
-			key_psw = argv[optind - 1];
-			break;
-#endif
-		default:
-			fprintf(stderr, "invalid argument: '%c'\n", opt);
-			usage();
-			exit(1);
-		}
-	}
-
-	if (enable_ssl) {
-#ifdef NNG_SUPP_TLS
-		tls_client(url, cafile, cert, key, key_psw);
-#else
-		fprintf(stderr, "tls client: Not supported \n");
-#endif
-	} else {
-		client(url, version);
-	}
+	client(&opts);
 
 	return 0;
 }
