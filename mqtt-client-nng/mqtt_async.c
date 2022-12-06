@@ -42,6 +42,7 @@ typedef struct {
 	char *  key;
 	size_t  key_len;
 	char *  keypass;
+	bool    enable_sqlite;
 } client_opts;
 
 enum options {
@@ -54,6 +55,7 @@ enum options {
 	OPT_CERTFILE,
 	OPT_KEYFILE,
 	OPT_KEYPASS,
+	OPT_SQLITE,
 };
 
 static nng_optspec cmd_opts[] = {
@@ -67,6 +69,7 @@ static nng_optspec cmd_opts[] = {
 	    .o_val   = OPT_VERSION,
 	    .o_arg   = true },
 	{ .o_name = "url", .o_val = OPT_URL, .o_arg = true },
+	{ .o_name = "sqlite", .o_val = OPT_SQLITE },
 	{ .o_name = "secure", .o_short = 's', .o_val = OPT_SECURE },
 	{ .o_name = "cacert", .o_val = OPT_CACERT, .o_arg = true },
 	{ .o_name = "key", .o_val = OPT_KEYFILE, .o_arg = true },
@@ -83,6 +86,30 @@ static void usage(void);
 static void loadfile(const char *path, void **datap, size_t *lenp);
 static int  init_dialer_tls(nng_dialer d, const char *cacert, const char *cert,
      const char *key, const char *pass);
+
+#if defined(NNG_SUPP_SQLITE)
+static int
+sqlite_config(
+    nng_socket *sock, nng_mqtt_sqlite_option *sqlite, uint8_t proto_ver)
+{
+	int rv;
+
+	// set sqlite option
+	nng_mqtt_set_sqlite_enable(sqlite, true);
+	nng_mqtt_set_sqlite_flush_threshold(sqlite, 50);
+	nng_mqtt_set_sqlite_max_rows(sqlite, 500);
+	nng_mqtt_set_sqlite_db_dir(sqlite, "/tmp/");
+
+	// init sqlite db
+	nng_mqtt_sqlite_db_init(sqlite, "mqtt_client.db", proto_ver);
+
+	// set sqlite option pointer to socket
+	return nng_socket_set_ptr(*sock, NNG_OPT_MQTT_SQLITE, sqlite);
+
+	return (0);
+}
+#endif
+
 
 int
 client_parse_opts(int argc, char **argv, client_opts *opt)
@@ -110,6 +137,9 @@ client_parse_opts(int argc, char **argv, client_opts *opt)
 			    "URL (--url) may be specified "
 			    "only once.");
 			opt->url = nng_strdup(arg);
+			break;
+		case OPT_SQLITE:
+			opt->enable_sqlite = true;
 			break;
 		case OPT_SECURE:
 			opt->enable_ssl = true;
@@ -352,6 +382,17 @@ client(client_opts *opts)
 		fatal("nng_socket: %s", nng_strerror(rv));
 	}
 
+#if defined(NNG_SUPP_SQLITE)
+	nng_mqtt_sqlite_option *sqlite = NULL;
+	if (opts->enable_sqlite) {
+		if ((rv = nng_mqtt_alloc_sqlite_opt(&sqlite)) != 0) {
+			fatal(
+			    "nng_mqtt_alloc_sqlite_opt: %s", nng_strerror(rv));
+		}
+		sqlite_config(&sock, sqlite, opts->version);
+	}
+#endif
+
 	for (i = 0; i < opts->parallel; i++) {
 		works[i] = alloc_work(sock);
 	}
@@ -388,6 +429,10 @@ client(client_opts *opts)
 	for (;;) {
 		nng_msleep(3600000); // neither pause() nor sleep() portable
 	}
+
+#if defined(NNG_SUPP_SQLITE)
+	nng_mqtt_free_sqlite_opt(sqlite);
+#endif
 }
 
 // This reads a file into memory.  Care is taken to ensure that
@@ -486,30 +531,6 @@ out:
 	return (rv);
 }
 
-
-#if defined(NNG_SUPP_SQLITE)
-static int
-sqlite_config(
-    nng_socket *sock, nng_mqtt_sqlite_option *sqlite, uint8_t proto_ver)
-{
-	int rv;
-
-	// set sqlite option
-	nng_mqtt_set_sqlite_enable(sqlite, true);
-	nng_mqtt_set_sqlite_flush_threshold(sqlite, 50);
-	nng_mqtt_set_sqlite_max_rows(sqlite, 500);
-	nng_mqtt_set_sqlite_db_dir(sqlite, "/tmp/nanomq");
-
-	// init sqlite db
-	nng_mqtt_sqlite_db_init(sqlite, "mqtt_client.db", proto_ver);
-
-	// set sqlite option pointer to socket
-	return nng_socket_set_ptr(*sock, NNG_OPT_MQTT_SQLITE, sqlite);
-
-	return (0);
-}
-#endif
-
 static void
 usage(void)
 {
@@ -518,6 +539,7 @@ usage(void)
 	printf("    --url <url>   \n");
 	printf("    -n, --parallel <number of works> (default: 32)\n");
 	printf("    -v, --version  <mqtt version> (default: 4)\n");
+	printf("    --sqlite  enable sqlite cache (default: false)\n");
 	printf(
 	    "    -s, --secure   enable ssl/tls mode (default: disable)\n");
 	printf("    --cacert       <cafile path>\n");
