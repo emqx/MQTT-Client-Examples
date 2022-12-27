@@ -14,6 +14,8 @@
 #include <nng/supplemental/tls/tls.h>
 #include <nng/supplemental/util/options.h>
 
+static void sub_callback(void *arg);
+
 static void
 fatal(const char *msg, ...)
 {
@@ -314,13 +316,43 @@ alloc_work(nng_socket sock)
 void
 connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	int reason = 0;
+	nng_socket *sock = arg;
+	int reason = -1;
 	// get connect reason
 	nng_pipe_get_int(p, NNG_OPT_MQTT_CONNECT_REASON, &reason);
 	// get property for MQTT V5
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_CONNECT_PROPERTY, &prop);
 	printf("%s: connected[%d]!\n", __FUNCTION__, reason);
+
+	if (reason == 0) {
+		// subscribe to mqtt broker
+		nng_mqtt_topic_qos subscriptions[] = {
+			{
+			    .qos   = 1,
+			    .topic = { 
+					.buf    = (uint8_t *) SUB_TOPIC1,
+			        .length = strlen(SUB_TOPIC1), 
+				},
+			},
+			{
+			    .qos   = 2,
+			    .topic = { 
+					.buf    = (uint8_t *) SUB_TOPIC2,
+			        .length = strlen(SUB_TOPIC2), 
+				},
+			},
+		};
+
+		nng_mqtt_cb_opt cb_opt = {
+			.sub_ack_cb = sub_callback,
+		};
+
+		nng_mqtt_client *client =
+		    nng_mqtt_client_alloc(sock, &cb_opt, true);
+		nng_mqtt_subscribe_async(client, subscriptions,
+		    sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
+	}
 }
 
 // Disconnect message callback function
@@ -356,6 +388,7 @@ sub_callback(void *arg)
 		printf("\n");
 
 		nng_msg_free(msg);
+		nng_mqtt_client_free(client, true);
 	}
 }
 
@@ -398,8 +431,10 @@ client(client_opts *opts)
 	nng_mqtt_msg_alloc(&msg, 0);
 	nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
-	nng_mqtt_msg_set_connect_clean_session(msg, true);
+	nng_mqtt_msg_set_connect_clean_session(msg, false);
 	nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
+	nng_mqtt_msg_set_connect_user_name(msg, "admin");
+	nng_mqtt_msg_set_connect_password(msg, "public");
 
 	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
 	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
@@ -417,32 +452,6 @@ client(client_opts *opts)
 
 	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
 	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
-
-	// subscribe to mqtt broker
-	nng_mqtt_topic_qos subscriptions[] = {
-			{
-			    .qos   = 1,
-			    .topic = { 
-					.buf    = (uint8_t *) SUB_TOPIC1,
-			        .length = strlen(SUB_TOPIC1), 
-				},
-			},
-			{
-			    .qos   = 2,
-			    .topic = { 
-					.buf    = (uint8_t *) SUB_TOPIC2,
-			        .length = strlen(SUB_TOPIC2), 
-				},
-			},
-		};
-
-	nng_mqtt_cb_opt cb_opt = {
-		.sub_ack_cb = sub_callback,
-	};
-
-	nng_mqtt_client *client = nng_mqtt_client_alloc(&sock, &cb_opt, true);
-	nng_mqtt_subscribe_async(client, subscriptions,
-	    sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
 
 	for (i = 0; i < opts->parallel; i++) {
 		client_cb(works[i]);

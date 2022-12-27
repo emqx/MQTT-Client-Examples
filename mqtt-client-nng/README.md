@@ -57,6 +57,8 @@ nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
 nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 nng_mqtt_msg_set_connect_clean_session(msg, true);
 nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
+ nng_mqtt_msg_set_connect_user_name(msg, "admin");
+ nng_mqtt_msg_set_connect_password(msg, "public");
 ```
 
 
@@ -109,7 +111,7 @@ nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
   .sub_ack_cb = sub_callback,
  };
 
- nng_mqtt_client *client = nng_mqtt_client_alloc(&sock, &cb_opt, true);
+ nng_mqtt_client *client = nng_mqtt_client_alloc(sock, &cb_opt, true);
  nng_mqtt_subscribe_async(client, subscriptions,
      sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
 
