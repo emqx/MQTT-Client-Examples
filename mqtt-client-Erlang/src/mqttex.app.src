@@ -1,0 +1,11 @@
+{application, mqttex,
+ [{description, "MQTT Client Examples"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {mqttex_app, []}},
+  {applications, [kernel, stdlib]},
+  {env,[]},
+  {modules, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
