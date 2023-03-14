@@ -18,9 +18,9 @@
   "license": "CC0-1.0",
   "dependencies": {
     "bulma": "^0.9.0",
-    "mqtt": "^4.2.1"
+    "mqtt": "^4.3.7"
   },
   "devDependencies": {
-    "electron": "^10.1.2"
+    "electron": "19.0.0"
   }
 }
