@@ -1,6 +1,7 @@
 package io.emqx.mqtt;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -49,7 +50,8 @@ public class Connection {
         options.setCleanSession(false);
         if (tls) {
             try {
-                options.setSocketFactory(SSLUtils.getSingleSocketFactory(context.getResources().openRawResource(R.raw.cacert)));
+                AssetManager am = context.getAssets();
+                options.setSocketFactory(SSLUtils.getSingleSocketFactory(am.open("ca.crt")));
             } catch (Exception e) {
                 e.printStackTrace();
             }
