@@ -3,38 +3,53 @@
 import * as mqtt from "mqtt/dist/mqtt.min";
 import { reactive, ref } from "vue";
 
+// https://github.com/mqttjs/MQTT.js#qos
 const qosList = [0, 1, 2];
 
+/**
+ * this demo uses EMQX Public MQTT Broker (https://www.emqx.com/en/mqtt/public-mqtt5-broker), here are the details:
+ *
+ * Broker host: broker.emqx.io
+ * WebSocket port: 8083
+ * WebSocket over TLS/SSL port: 8084
+ */
 const connection = reactive({
+  // ws or wss
   protocol: "ws",
   host: "broker.emqx.io",
-  // ws: 8083; wss: 8084
+  // ws -> 8083; wss -> 8084
   port: 8083,
-  endpoint: "/mqtt",
-  // for more options, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
+  clientId: "emqx_vue3_" + Math.random().toString(16).substring(2, 8),
+  /**
+   * By default, EMQX allows clients to connect without authentication.
+   * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
+   */
+  username: "emqx_test",
+  password: "emqx_test",
   clean: true,
   connectTimeout: 30 * 1000, // ms
   reconnectPeriod: 4000, // ms
-  clientId: "emqx_vue3_" + Math.random().toString(16).substring(2, 8),
-  // auth
-  username: "emqx_test",
-  password: "emqx_test",
+  // for more options and details, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
 });
 
+// topic & QoS for MQTT subscribing
 const subscription = ref({
   topic: "topic/mqttx",
   qos: 0 as mqtt.QoS,
 });
+
+// topic, QoS & payload for publishing message
 const publish = ref({
   topic: "topic/browser",
   qos: 0 as mqtt.QoS,
   payload: '{ "msg": "Hello, I am browser." }',
 });
-const receiveNews = ref("");
+
 let client = ref({
   connected: false,
 } as mqtt.MqttClient);
-const subscribeSuccess = ref(false);
+const receivedMessages = ref("");
+const subscribedSuccess = ref(false);
 const btnLoadingType = ref("");
 const retryTimes = ref(0);
 
@@ -44,7 +59,7 @@ const initData = () => {
   } as mqtt.MqttClient;
   retryTimes.value = 0;
   btnLoadingType.value = "";
-  subscribeSuccess.value = false;
+  subscribedSuccess.value = false;
 };
 
 const handleOnReConnect = () => {
@@ -60,23 +75,45 @@ const handleOnReConnect = () => {
   }
 };
 
+// create MQTT connection
 const createConnection = () => {
   try {
     btnLoadingType.value = "connect";
-    const { protocol, host, port, endpoint, ...options } = connection;
-    const connectUrl = `${protocol}://${host}:${port}${endpoint}`;
+    const { protocol, host, port, ...options } = connection;
+    const connectUrl = `${protocol}://${host}:${port}/mqtt`;
+
+    /**
+     * if protocol is "ws", connectUrl = "ws://broker.emqx.io:8083/mqtt"
+     * if protocol is "wss", connectUrl = "wss://broker.emqx.io:8084/mqtt"
+     * 
+     * /mqtt: MQTT-WebSocket uniformly uses /path as the connection path,
+     * which should be specified when connecting, and the path used on EMQX is /mqtt.
+     * 
+     * for more details about "mqtt.connect" method & options,
+     * please refer to https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
+     */
     client.value = mqtt.connect(connectUrl, options);
+
     if (client.value.on) {
+      // https://github.com/mqttjs/MQTT.js#event-connect
       client.value.on("connect", () => {
         btnLoadingType.value = "";
         console.log("connection successful");
       });
+
+      // https://github.com/mqttjs/MQTT.js#event-reconnect
       client.value.on("reconnect", handleOnReConnect);
+
+      // https://github.com/mqttjs/MQTT.js#event-error
       client.value.on("error", (error) => {
         console.log("connection error:", error);
       });
+
+      // https://github.com/mqttjs/MQTT.js#event-message
       client.value.on("message", (topic: string, message) => {
-        receiveNews.value = receiveNews.value.concat(message.toString());
+        receivedMessages.value = receivedMessages.value.concat(
+          message.toString()
+        );
         console.log(`received message: ${message} from topic: ${topic}`);
       });
     }
@@ -100,7 +137,7 @@ const doSubscribe = () => {
         console.log("subscribe error:", error);
         return;
       }
-      subscribeSuccess.value = true;
+      subscribedSuccess.value = true;
       console.log("subscribe successfully:", granted);
     }
   );
@@ -113,7 +150,7 @@ const doUnSubscribe = () => {
   const { topic, qos } = subscription.value;
   client.value.unsubscribe(topic, { qos }, (error) => {
     btnLoadingType.value = "";
-    subscribeSuccess.value = false;
+    subscribedSuccess.value = false;
     if (error) {
       console.log("unsubscribe error:", error);
       return;
@@ -166,21 +203,19 @@ const handleProtocolChange = (value: string) => {
       <el-form label-position="top" :model="connection">
         <el-row :gutter="20">
           <el-col :span="8">
+            <el-form-item prop="protocol" label="Protocol">
+              <el-select
+                v-model="connection.protocol"
+                @change="handleProtocolChange"
+              >
+                <el-option label="ws://" value="ws"></el-option>
+                <el-option label="wss://" value="wss"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item prop="host" label="Host">
-              <el-row :gutter="10">
-                <el-col :span="7">
-                  <el-select
-                    v-model="connection.protocol"
-                    @change="handleProtocolChange"
-                  >
-                    <el-option label="ws://" value="ws"></el-option>
-                    <el-option label="wss://" value="wss"></el-option>
-                  </el-select>
-                </el-col>
-                <el-col :span="17">
-                  <el-input v-model="connection.host"></el-input>
-                </el-col>
-              </el-row>
+              <el-input v-model="connection.host"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -189,14 +224,6 @@ const handleProtocolChange = (value: string) => {
                 v-model.number="connection.port"
                 type="number"
                 placeholder="8083/8084"
-              ></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item prop="endpoint" label="Mountpoint">
-              <el-input
-                v-model="connection.endpoint"
-                placeholder="/mqtt"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -246,7 +273,7 @@ const handleProtocolChange = (value: string) => {
             <el-form-item prop="topic" label="Topic">
               <el-input
                 v-model="subscription.topic"
-                :disabled="subscribeSuccess"
+                :disabled="subscribedSuccess"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -254,7 +281,7 @@ const handleProtocolChange = (value: string) => {
             <el-form-item prop="qos" label="QoS">
               <el-select
                 v-model="subscription.qos"
-                :disabled="subscribeSuccess"
+                :disabled="subscribedSuccess"
               >
                 <el-option
                   v-for="qos in qosList"
@@ -270,13 +297,13 @@ const handleProtocolChange = (value: string) => {
               type="primary"
               class="sub-btn"
               :loading="btnLoadingType === 'subscribe'"
-              :disabled="!client.connected || subscribeSuccess"
+              :disabled="!client.connected || subscribedSuccess"
               @click="doSubscribe"
             >
-              {{ subscribeSuccess ? "Subscribed" : "Subscribe" }}
+              {{ subscribedSuccess ? "Subscribed" : "Subscribe" }}
             </el-button>
             <el-button
-              v-if="subscribeSuccess"
+              v-if="subscribedSuccess"
               type="primary"
               class="sub-btn"
               :loading="btnLoadingType === 'unsubscribe'"
@@ -334,7 +361,7 @@ const handleProtocolChange = (value: string) => {
         <el-input
           type="textarea"
           :rows="3"
-          v-model="receiveNews"
+          v-model="receivedMessages"
           readonly
         ></el-input>
       </el-col>
