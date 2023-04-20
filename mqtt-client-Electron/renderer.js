@@ -6,52 +6,120 @@
 // process.
 let client = null
 
+/**
+ * this demo uses EMQX Public MQTT Broker (https://www.emqx.com/en/mqtt/public-mqtt5-broker), here are the details:
+ *
+ * Broker host: broker.emqx.io
+ * TCP Port: 1883
+ * SSL/TLS Port: 8883
+ * WebSocket port: 8083
+ * WebSocket over TLS/SSL port: 8084
+ */
+
 const options = {
   keepalive: 30,
   protocolId: 'MQTT',
   protocolVersion: 4,
   clean: true,
-  reconnectPeriod: 1000,
-  connectTimeout: 30 * 1000,
-  will: {
-    topic: 'WillMsg',
-    payload: 'Connection Closed abnormally..!',
-    qos: 0,
-    retain: false
-  },
-  rejectUnauthorized: false
+  connectTimeout: 30 * 1000, // ms
+  reconnectPeriod: 4000, // ms
+  // for more options, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
 }
+
+const protocolSelect = document.getElementById('protocolSelect')
 const connectBtn = document.getElementById('connectBtn')
 const disconnectBtn = document.getElementById('disconnectBtn')
 const subBtn = document.getElementById('subBtn')
 const unsubBtn = document.getElementById('unsubBtn')
 const sendBtn = document.getElementById('sendBtn')
+const pathIpt = document.getElementById('pathIpt')
 
+protocolSelect.addEventListener('change', onProtocolChange)
 connectBtn.addEventListener('click', onConnect)
 disconnectBtn.addEventListener('click', onDisconnect)
 subBtn.addEventListener('click', onSub)
 unsubBtn.addEventListener('click', onUnsub)
 sendBtn.addEventListener('click', onSend)
 
+//  protocol->port    mqtt: 1883; mqtts: 8883; ws: 8083; wss: 8084
+function onProtocolChange() {
+  switch (connection.protocol.value) {
+    case 'mqtt':
+      connection.port.value = 1883
+      pathIpt.style.display = 'none'
+      break
+    case 'mqtts':
+      connection.port.value = 8883
+      pathIpt.style.display = 'none'
+      break
+    case 'ws':
+      connection.port.value = 8083
+      pathIpt.style.display = 'block'
+      break
+    case 'wss':
+      connection.port.value = 8084
+      pathIpt.style.display = 'block'
+      break
+    default:
+      break
+  }
+}
+
+// create MQTT connection
 function onConnect () {
-  const { host, port, clientId, username, password } = connection
-  const connectUrl = `mqtt://${host.value}:${port.value}`
+  const { protocol, host, port, clientId, username, password, path } = connection
+  
+  let connectUrl = `${protocol.value}://${host.value}:${port.value}`
+  if (protocol.value === 'ws' || protocol.value === 'wss') {
+    connectUrl = connectUrl + path.value
+  }
+
   options.clientId = clientId.value || `mqttjs_${Math.random().toString(16).substr(2, 8)}`
+
+  /**
+   * By default, EMQX allows clients to connect without authentication.
+   * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
+   */
   options.username = username.value
   options.password = password.value
   console.log('connecting mqtt client')
+  
+  /**
+   * if protocol is "mqtt", connectUrl = "mqtt://broker.emqx.io:1883"
+   * if protocol is "mqtts", connectUrl = "mqtts://broker.emqx.io:8883"
+   * if protocol is "ws", connectUrl = "ws://broker.emqx.io:8083/mqtt"
+   * if protocol is "wss", connectUrl = "wss://broker.emqx.io:8084/mqtt"
+   * 
+   * /mqtt: MQTT-WebSocket uniformly uses /path as the connection path,
+   * which should be specified when connecting, and the path used on EMQX is /mqtt.
+   * 
+   * Note: Here we use the mqtts or wss protocol with TLS one-way authentication,
+   * which only verifies the server's certificate and does not verify the client's certificate.
+   * If you require two-way authentication, please use TLS two-way authentication.
+   * 
+   * for more details about "mqtt.connect" method & options,
+   * please refer to https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
+   */
   client = mqtt.connect(connectUrl, options)
-  client.on('error', (err) => {
-    console.error('Connection error: ', err)
-    client.end()
-  })
-  client.on('reconnect', () => {
-    console.log('Reconnecting...')
-  })
+
+  // https://github.com/mqttjs/MQTT.js#event-connect
   client.on('connect', () => {
     console.log('Client connected:' + options.clientId)
     connectBtn.innerText = 'Connected'
   })
+
+  // https://github.com/mqttjs/MQTT.js#event-reconnect
+  client.on('reconnect', () => {
+    console.log('Reconnecting...')
+  })
+
+  // https://github.com/mqttjs/MQTT.js#event-error
+  client.on('error', (err) => {
+    console.error('Connection error: ', err)
+    client.end()
+  })
+
+  // https://github.com/mqttjs/MQTT.js#event-message
   client.on('message', (topic, message) => {
     const msg = document.createElement('div')
     msg.className = 'message-body'
@@ -60,8 +128,11 @@ function onConnect () {
   })
 }
 
+// disconnect
+// https://github.com/mqttjs/MQTT.js#mqttclientendforce-options-callback
 function onDisconnect () {
   if (client.connected) {
+    // https://github.com/mqttjs/MQTT.js#end
     client.end()
     client.on('close', () => {
       connectBtn.innerText = 'Connect'
@@ -70,8 +141,11 @@ function onDisconnect () {
   }
 }
 
+// subscribe topic
+// https://github.com/mqttjs/MQTT.js#mqttclientsubscribetopictopic-arraytopic-object-options-callback
 function onSub () {
   if (client.connected) {
+    // https://github.com/mqttjs/MQTT.js#qos
     const { topic, qos } = subscriber
     client.subscribe(topic.value, { qos: parseInt(qos.value, 10) }, (error, res) => {
        if (error) {
@@ -83,6 +157,8 @@ function onSub () {
   }
 }
 
+// unsubscribe topic
+// https://github.com/mqttjs/MQTT.js#mqttclientunsubscribetopictopic-array-options-callback
 function onUnsub () {
   if (client.connected) {
     const { topic } = subscriber
@@ -96,6 +172,8 @@ function onUnsub () {
   }
 }
 
+// publish message
+// https://github.com/mqttjs/MQTT.js#mqttclientpublishtopic-message-options-callback
 function onSend () {
   if (client.connected) {
     const { topic, qos, payload } = publisher

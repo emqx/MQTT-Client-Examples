@@ -21,6 +21,19 @@
           <form name="connection" class="content">
             <div class="columns">
               <div class="column">
+                <label class="label">Protocol</label>
+                <div class="control">
+                  <div class="select">
+                    <select name="protocol" id="protocolSelect"> 
+                      <option value="mqtt">mqtt</option>
+                      <option value="mqtts">mqtts</option>
+                      <option value="ws">ws</option>
+                      <option value="wss">wss</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="column">
                 <label class="label">Host</label>
                 <div class="control">
                   <input class="input" name="host" type="text" value="broker.emqx.io">
@@ -52,8 +65,11 @@
                   <input class="input" name="password" type="text">
                 </div>
               </div>
-              <div class="column">
-                <div></div>
+              <div class="column" id="pathIpt">
+                <label class="label">Path</label>
+                <div class="control">
+                  <input class="input" name="path" type="text" value="/mqtt">
+                </div>
               </div>
             </div>
           </form>
