@@ -6,8 +6,7 @@ const char *ssid = "[WIFI SSID]"; // Enter your WiFi name
 const char *password = "[WIFI password]";  // Enter WiFi password
 
 // MQTT Broker
-const char *mqtt_broker = "xxxxx.ala.cn-hangzhou.emqxsl.cn"; // endpoint of your EMQX Cloud Serverless instance
-// const char *mqtt_broker = "broker.emqx.io"; // endpoint of public emqx broker
+const char *mqtt_broker = "broker.emqx.io"; // endpoint of emqx broker
 const char *mqtt_topic = "emqx/esp8266";  // define topic
 const char *mqtt_username = "your_MQTT_username";   // username for authentication
 const char *mqtt_password = "your_MQTT_password";   // password for authentication
@@ -17,10 +16,18 @@ const int mqtt_port = 8883; // port of MQTT over SSL
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
-// fingerprint of *.emqxsl.cn
-const char* fingerprint = "7E:52:D3:84:48:3C:5A:9F:A4:39:9A:8B:27:01:B1:F8:C6:AD:D4:47";
-// fingerprint of broker.emqx.io
-// const char* fingerprint = "B6 C6 FF 82 C6 59 09 BB D6 39 80 7F E7 BC 10 C9 19 C8 21 8E";
+/*
+  The common fingerprints of EMQX broker, for reference only.
+  If you are not using EMQX Cloud Serverless or public EMQX broker,
+  you need to calculate the sha1 fingerprint of your server certificate
+  and update the 'fingerprint' variable below.
+*/
+// 1. fingerprint of public emqx broker. Host: broker.emqx.io
+const char* fingerprint = "B6 C6 FF 82 C6 59 09 BB D6 39 80 7F E7 BC 10 C9 19 C8 21 8E";
+// 2. fingerprint of EMQX Cloud Serverless. Host: *.emqxsl.com
+// const char* fingerprint = "42:AE:D8:A3:42:F1:C4:1F:CD:64:9C:D7:4B:A1:EE:5B:5E:D7:E2:B5";
+// 3. fingerprint of EMQX Cloud Serverless. Host: *.emqxsl.cn
+// const char* fingerprint = "7E:52:D3:84:48:3C:5A:9F:A4:39:9A:8B:27:01:B1:F8:C6:AD:D4:47";
 
 void setup() {
   // Set software serial baud to 115200;
