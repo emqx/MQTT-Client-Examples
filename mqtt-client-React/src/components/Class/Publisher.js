@@ -1,28 +1,29 @@
-import React from "react";
-import { Card, Form, Input, Row, Col, Button, Select } from "antd";
-import { QosOption } from "./index";
+import React from 'react'
+import { Card, Form, Input, Row, Col, Button, Select } from 'antd'
+import { QosOption } from './index'
 
 class Publisher extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
+      // topic, QoS for publishing message
       record: {
-        topic: "testtopic/react",
+        topic: 'testtopic/react',
         qos: 0,
       },
-    };
+    }
   }
 
   onRecordChange = (value) => {
-    const { record } = this.state;
-    const changedRecord = Object.assign(record, value);
-    this.setState({ record: changedRecord });
-  };
+    const { record } = this.state
+    const changedRecord = Object.assign(record, value)
+    this.setState({ record: changedRecord })
+  }
 
   handlePublish = () => {
-    const { record } = this.state;
-    this.props.publish(record);
-  };
+    const { record } = this.state
+    this.props.publish(record)
+  }
 
   render() {
     const PublishForm = (
@@ -52,7 +53,7 @@ class Publisher extends React.Component {
               <Input.TextArea />
             </Form.Item>
           </Col>
-          <Col span={8} offset={16} style={{ textAlign: "right" }}>
+          <Col span={8} offset={16} style={{ textAlign: 'right' }}>
             <Form.Item>
               <Button
                 type="primary"
@@ -65,10 +66,10 @@ class Publisher extends React.Component {
           </Col>
         </Row>
       </Form>
-    );
+    )
 
-    return <Card title="Publisher">{PublishForm}</Card>;
+    return <Card title="Publisher">{PublishForm}</Card>
   }
 }
 
-export default Publisher;
+export default Publisher

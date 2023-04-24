@@ -1,6 +1,12 @@
 # mqtt-client-React
 
+This demo is just for you to learn how to connect to [EMQX Public MQTT Broker](https://www.emqx.com/en/mqtt/public-mqtt5-broker) in React using MQTT.js.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Prerequisites
+
+- Install Node.js version 14.0 or higher
 
 ## Available Scripts
 

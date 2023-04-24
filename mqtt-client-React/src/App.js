@@ -1,8 +1,8 @@
-import React from 'react';
+import React from 'react'
 import HookMqtt from './components/Hook/'
 // Hook or Class
 // import ClassMqtt from './components/Class/'
-import './App.css';
+import './App.css'
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
       {/* Hook or Class */}
       {/* <ClassMqtt /> */}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

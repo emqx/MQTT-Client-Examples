@@ -1,57 +1,79 @@
-import React from "react";
-import { Card, Button, Form, Input, Row, Col } from "antd";
+import React from 'react'
+import { Card, Button, Form, Input, Row, Col, Select } from 'antd'
+
+/**
+ * this demo uses EMQX Public MQTT Broker (https://www.emqx.com/en/mqtt/public-mqtt5-broker), here are the details:
+ *
+ * Broker host: broker.emqx.io
+ * WebSocket port: 8083
+ * WebSocket over TLS/SSL port: 8084
+ */
 
 class Connection extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      record: {
-        host: "broker.emqx.io",
-        clientId: `mqttjs_ + ${Math.random().toString(16).substr(2, 8)}`,
+      initialConnectionOptions: {
+        // ws or wss
+        protocol: 'ws',
+        host: 'broker.emqx.io',
+        clientId: 'emqx_react_' + Math.random().toString(16).substring(2, 8),
+        // ws -> 8083; wss -> 8084
         port: 8083,
+        /**
+         * By default, EMQX allows clients to connect without authentication.
+         * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
+         */
+        username: 'emqx_test',
+        password: 'emqx_test',
       },
-    };
+    }
   }
 
-  onRecordChange = (value) => {
-    const { record } = this.state;
-    const changedRecord = Object.assign(record, value);
-    this.setState({ record: changedRecord });
-  };
+  formRef = React.createRef()
+
+  handleProtocolChange = (value) => {
+    this.formRef.current.setFieldsValue({
+      port: value === 'wss' ? 8084 : 8083,
+    })
+  }
+
+  onFinish = (values) => {
+    const { protocol, host, clientId, port, username, password } = values
+    const url = `${protocol}://${host}:${port}/mqtt`
+    const options = {
+      clientId,
+      username,
+      password,
+      clean: true,
+      reconnectPeriod: 1000, // ms
+      connectTimeout: 30 * 1000, // ms
+    }
+    this.props.connect(url, options)
+  }
 
   handleConnect = () => {
-    const { host, clientId, port, username, password } = this.state.record;
-    const url = `ws://${host}:${port}/mqtt`;
-    const options = {
-      keepalive: 30,
-      protocolId: "MQTT",
-      protocolVersion: 4,
-      clean: true,
-      reconnectPeriod: 1000,
-      connectTimeout: 30 * 1000,
-      will: {
-        topic: "WillMsg",
-        payload: "Connection Closed abnormally..!",
-        qos: 0,
-        retain: false,
-      },
-      rejectUnauthorized: false,
-    };
-    options.clientId = clientId;
-    options.username = username;
-    options.password = password;
-    this.props.connect(url, options);
-  };
+    this.formRef.current.submit()
+  }
 
   render() {
     const ConnectionForm = (
       <Form
+        ref={this.formRef}
         layout="vertical"
         name="basic"
-        initialValues={this.state.record}
-        onValuesChange={this.onRecordChange}
+        initialValues={this.state.initialConnectionOptions}
+        onFinish={this.onFinish}
       >
         <Row gutter={20}>
+          <Col span={8}>
+            <Form.Item label="Protocol" name="protocol">
+              <Select onChange={this.handleProtocolChange}>
+                <Select.Option value="ws">ws</Select.Option>
+                <Select.Option value="wss">wss</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
           <Col span={8}>
             <Form.Item label="Host" name="host">
               <Input />
@@ -79,7 +101,7 @@ class Connection extends React.Component {
           </Col>
         </Row>
       </Form>
-    );
+    )
 
     return (
       <Card
@@ -95,8 +117,8 @@ class Connection extends React.Component {
       >
         {ConnectionForm}
       </Card>
-    );
+    )
   }
 }
 
-export default Connection;
+export default Connection
