@@ -6,6 +6,7 @@ const Publisher = ({ publish }) => {
   const [form] = Form.useForm();
   const qosOptions = useContext(QosOption);
 
+  // topic, QoS for publishing message
   const record = {
     topic: 'testtopic/react',
     qos: 0,
