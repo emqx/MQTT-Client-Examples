@@ -1,8 +1,10 @@
 # python 3.x
 
 import datetime
+import json
 import random
-import sqlite3
+import sqlite3 as db
+# import duckdb as db
 import time
 
 from paho.mqtt import client as mqtt_client
@@ -16,28 +18,46 @@ USERNAME = 'emqx'
 PASSWORD = 'public'
 CA_CERTS = './broker.emqx.io-ca.crt'
 
+TABLE_NAME = 'message'
 # create connection to sqlite database
-conn = sqlite3.connect('./message_log.db')
+conn = db.connect(database='./message_log.db')
 
 ts = time.time()
 
 
 def db_init():
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS message (publishAt DATETIME, clientId TEXT, topic TEXT, payload TEXT)")
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS {table} "
+        "(publishAt VARCHAR, clientId VARCHAR, topic VARCHAR)".
+        format(table=TABLE_NAME))
     conn.commit()
 
 
 def save_message(publish_at, client_id, topic, payload=None, conn=conn):
     cursor = conn.cursor()
     try:
+        cols, vals = [], []
+        data = json.loads(payload)
+        for key, val in data.items():
+            column = str(key).replace(' ', '_')
+            cursor.execute("PRAGMA table_info({table})".format(table=TABLE_NAME))
+            columns = cursor.fetchall()
+            # add column if not exist
+            if not any(column in col for col in columns):
+                cursor.execute(
+                    "ALTER TABLE {table} ADD COLUMN {column} VARCHAR".
+                    format(table=TABLE_NAME, column=column))
+            cols.append(str(column))
+            vals.append(f"'{val}'".format(val=val))
         # insert message data into sqlite database
-        cursor.execute("INSERT INTO message "
-                       "(publishAt, clientId, topic, payload)"
-                       "VALUES (?, ?, ?, ?)", (publish_at, client_id, topic, payload))
+        cursor.execute("INSERT INTO {table} "
+                       "(publishAt, clientId, topic, {cols})"
+                       "VALUES (?, ?, ?,{vals})".format(table=TABLE_NAME, cols=','.join(cols), vals=','.join(vals)),
+                       (publish_at, client_id, topic))
         conn.commit()
         print("Saved message successfully!")
-    except sqlite3.Error as e:
+    except db.Error as e:
         print("Failed to save message.", e)
 
 
