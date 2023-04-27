@@ -3,19 +3,21 @@ package main
 import (
 	"flag"
 	"log"
-	"mqtt-client-Go/protocols"
+	"pubsub/protocols"
 )
 
-var Host     = flag.String("host", "broker.emqx.io", "server hostname or IP")
-var Port     = flag.Int("port", 1883, "server port")
-var Action   = flag.String("action", "pubsub", "pub/sub/pubsub action")
-var Protocol = flag.String("protocol", "mqtt", "mqtt/mqtts/ws/wss")
-var Topic    = flag.String("topic", "golang-mqtt/test", "publish/subscribe topic")
-var Username = flag.String("username", "emqx", "username")
-var Password = flag.String("password", "public", "password")
-var Qos      = flag.Int("qos", 0, "MQTT QOS")
-var Tls      = flag.Bool("tls", false, "Enable TLS/SSL")
-var CaCert   = flag.String("cacert", "./broker.emqx.io-ca.crt", "tls cacert")
+var (
+	Host     = flag.String("host", "broker.emqx.io", "server hostname or IP")
+	Port     = flag.Int("port", 1883, "server port")
+	Action   = flag.String("action", "pubsub", "pub/sub/pubsub action")
+	Protocol = flag.String("protocol", "mqtt", "mqtt/mqtts/ws/wss")
+	Topic    = flag.String("topic", "golang-mqtt/test", "publish/subscribe topic")
+	Username = flag.String("username", "emqx", "username")
+	Password = flag.String("password", "public", "password")
+	Qos      = flag.Int("qos", 0, "MQTT QOS")
+	Tls      = flag.Bool("tls", false, "Enable TLS/SSL")
+	CaCert   = flag.String("cacert", "./broker.emqx.io-ca.crt", "tls cacert")
+)
 
 func main() {
 	flag.Parse()

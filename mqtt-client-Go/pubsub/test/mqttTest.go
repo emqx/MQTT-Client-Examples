@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
+	"log"
 	"sync/atomic"
 	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 const brokerHost = "112.74.78.165:1883"
@@ -46,18 +48,19 @@ func main() {
 				token := mqttClient.Publish(topic, 2, false, []byte(body))
 				if token.Error() != nil {
 					fmt.Printf("publish qos:2 topic:%s err:%v \n", topic, token.Error())
-				if !token.WaitTimeout(3 * time.Second) {
-					fmt.Printf("pub timeout:%d topic:%s \n", 3, topic)
+					if !token.WaitTimeout(3 * time.Second) {
+						fmt.Printf("pub timeout:%d topic:%s \n", 3, topic)
+					}
+					atomic.AddUint64(&ops, 1)
 				}
-				atomic.AddUint64(&ops, 1)
 			}
 		}()
-	}
-	for i := 0; i < 100000; i++ {
-		time.Sleep(time.Second * 1)
-		fmt.Println("pub and sub ------>>>", ops)
-	}
+		for i := 0; i < 100000; i++ {
+			time.Sleep(time.Second * 1)
+			fmt.Println("pub and sub ------>>>", ops)
+		}
 
+	}
 }
 
 func newClient() error {
@@ -66,15 +69,15 @@ func newClient() error {
 	opts.SetPingTimeout(10 * time.Second)
 	opts.SetWriteTimeout(3 * time.Second)
 	opts.SetCleanSession(true)
-	opts.SetConnectRetryInterval(5 * time.Second)
+	//opts.SetConnectRetryInterval(5 * time.Second)
 	opts.SetMaxReconnectInterval(5 * time.Second)
 	opts.SetOrderMatters(false)
 	opts.AutoReconnect = true
 	// 重连的最大时间间隔为5s，1，2，4，5，5，5，5，5，5...
 	opts.SetMaxReconnectInterval(5 * time.Second)
-	opts.OnReconnecting = func(_ mqtt.Client, _ *mqtt.ClientOptions) {
+	opts.SetOnConnectHandler(func(_ mqtt.Client) {
 		fmt.Printf("reconnect to mqtt broker %v \n", time.Now())
-	}
+	})
 
 	opts.OnConnectionLost = func(_ mqtt.Client, e error) {
 		fmt.Printf("mqtt connection lost, err: %v  \n", e.Error())
@@ -84,9 +87,9 @@ func newClient() error {
 		topicMap := make(map[string]byte)
 		topicMap["/test/sub/topic"] = 0
 		if token := mqttClient.SubscribeMultiple(topicMap, func(client mqtt.Client, message mqtt.Message) {
-			fmt.Printf("SubscribeMultiple:\n", message.Topic())
+			fmt.Printf("SubscribeMultiple:%v\n", message.Topic())
 		}); token.Wait() && token.Error() != nil {
-			fmt.Printf("mqtt subscribe services reply err:\n", token.Error())
+			fmt.Printf("mqtt subscribe services reply err:%v\n", token.Error())
 		}
 	}
 
