@@ -10,7 +10,7 @@ BROKER = 'broker.emqx.io'
 PORT = 8883
 TOPIC = "python-mqtt/tls"
 # generate client ID with pub prefix randomly
-CLIENT_ID = "python-mqtt-tls-sub-{id}".format(id=random.randint(0, 1000))
+CLIENT_ID = f'python-mqtt-tls-sub-{random.randint(0, 1000)}'
 USERNAME = 'emqx'
 PASSWORD = 'public'
 
@@ -27,15 +27,14 @@ def on_connect(client, userdata, flags, rc):
         print("Connected to MQTT Broker!")
         client.subscribe(TOPIC)
     else:
-        print("Failed to connect, return code {rc}".format(rc=rc), )
+        print(f'Failed to connect, return code {rc}')
 
 
 def on_disconnect(client, userdata, rc):
-    logging.info("Disconnected with result code: " + str(rc))
+    logging.info("Disconnected with result code: %s", rc)
     reconnect_count, reconnect_delay = 0, FIRST_RECONNECT_DELAY
     while reconnect_count < MAX_RECONNECT_COUNT:
-        logging.info("Reconnecting in {reconnect_delay} seconds..."
-                     .format(reconnect_delay=reconnect_delay))
+        logging.info("Reconnecting in %d seconds...", reconnect_delay)
         time.sleep(reconnect_delay)
 
         try:
@@ -43,21 +42,18 @@ def on_disconnect(client, userdata, rc):
             logging.info("Reconnected successfully!")
             return
         except Exception as err:
-            logging.error("{err}. Reconnect failed. Retrying...".format(err=err))
+            logging.error("%s. Reconnect failed. Retrying...", err)
 
         reconnect_delay *= RECONNECT_RATE
-        if reconnect_delay > MAX_RECONNECT_DELAY:
-            reconnect_delay = MAX_RECONNECT_DELAY
+        reconnect_delay = min(reconnect_delay, MAX_RECONNECT_DELAY)
         reconnect_count += 1
-    logging.info("Reconnect failed after {reconnect_count} attempts. Exiting..."
-                 .format(reconnect_count=reconnect_count))
+    logging.info("Reconnect failed after %s attempts. Exiting...", reconnect_count)
     global FLAG_EXIT
     FLAG_EXIT = True
 
 
 def on_message(client, userdata, msg):
-    print("Received `{payload}` from `{topic}` topic".format(
-        payload=msg.payload.decode(), topic=msg.topic))
+    print(f'Received `{msg.payload.decode()}` from `{msg.topic}` topic')
 
 
 def connect_mqtt():
