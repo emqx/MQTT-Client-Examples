@@ -5,9 +5,9 @@
 
 ## 准备工作
 
-* 安装 Node.js 和 NPM
+- 安装 Node.js 和 NPM
 
-* 安装依赖
+- 安装依赖
 
   ```bash
   npm install
@@ -15,7 +15,7 @@
   yarn
   ```
 
-* 运行
+- 运行
 
   ```bash
   npm start
@@ -26,9 +26,5 @@
 ## 使用说明
 
 ```bash
-node index.js -p mqtt
-
-Options:
-  -p, --protocol <type>  connect protocol: mqtt, mqtts, ws, wss. default is mqtt (default: "mqtt")
-  -h, --help             display help for command
+node index.js
 ```
