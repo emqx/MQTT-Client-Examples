@@ -5,9 +5,9 @@ For more documentation on the use of the Javascript MQTT.js client, see the [Jav
 
 ## Installation
 
-* Install Node.js and NPM
+- Install Node.js and NPM
 
-* Installation dependencies
+- Installation dependencies
 
   ```bash
   npm install
@@ -15,7 +15,7 @@ For more documentation on the use of the Javascript MQTT.js client, see the [Jav
   yarn
   ```
 
-* Start
+- Start
 
   ```bash
   npm start
@@ -26,9 +26,5 @@ For more documentation on the use of the Javascript MQTT.js client, see the [Jav
 ## Usage
 
 ```bash
-node index.js -p mqtt
-
-Options:
-  -p, --protocol <type>  connect protocol: mqtt, mqtts, ws, wss. default is mqtt (default: "mqtt")
-  -h, --help             display help for command
+node index.js
 ```
