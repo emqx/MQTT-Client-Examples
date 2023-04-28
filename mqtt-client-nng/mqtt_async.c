@@ -10,11 +10,9 @@
 
 #include <nng/mqtt/mqtt_client.h>
 #include <nng/nng.h>
-#include <nng/supplemental/util/platform.h>
 #include <nng/supplemental/tls/tls.h>
 #include <nng/supplemental/util/options.h>
-
-static void sub_callback(void *arg);
+#include <nng/supplemental/util/platform.h>
 
 static void
 fatal(const char *msg, ...)
@@ -45,6 +43,8 @@ typedef struct {
 	size_t  key_len;
 	char *  keypass;
 	bool    enable_sqlite;
+	char *  username;
+	char *  password;
 } client_opts;
 
 enum options {
@@ -57,6 +57,8 @@ enum options {
 	OPT_CERTFILE,
 	OPT_KEYFILE,
 	OPT_KEYPASS,
+	OPT_USERNAME,
+	OPT_PASSWORD,
 	OPT_SQLITE,
 };
 
@@ -80,6 +82,18 @@ static nng_optspec cmd_opts[] = {
 	    .o_name  = "cert",
 	    .o_short = 'E',
 	    .o_val   = OPT_CERTFILE,
+	    .o_arg   = true,
+	},
+	{
+	    .o_name  = "username",
+	    .o_short = 'u',
+	    .o_val   = OPT_USERNAME,
+	    .o_arg   = true,
+	},
+	{
+	    .o_name  = "password",
+	    .o_short = 'P',
+	    .o_val   = OPT_PASSWORD,
 	    .o_arg   = true,
 	},
 };
@@ -112,14 +126,13 @@ sqlite_config(
 }
 #endif
 
-
 int
 client_parse_opts(int argc, char **argv, client_opts *opt)
 {
-	int    idx = 1;
-	char * arg;
-	int    val;
-	int    rv;
+	int   idx = 1;
+	char *arg;
+	int   val;
+	int   rv;
 
 	while ((rv = nng_opts_parse(argc, argv, cmd_opts, &val, &arg, &idx)) ==
 	    0) {
@@ -170,6 +183,18 @@ client_parse_opts(int argc, char **argv, client_opts *opt)
 			    "once.");
 			opt->keypass = nng_strdup(arg);
 			break;
+		case OPT_USERNAME:
+			ASSERT_NULL(opt->username,
+			    "Username (--username) may be specified only "
+			    "once.");
+			opt->username = nng_strdup(arg);
+			break;
+		case OPT_PASSWORD:
+			ASSERT_NULL(opt->password,
+			    "Password (--password) may "
+			    "be specified only once.");
+			opt->password = nng_strdup(arg);
+			break;
 		}
 	}
 
@@ -196,7 +221,7 @@ client_parse_opts(int argc, char **argv, client_opts *opt)
 		opt->version = MQTT_PROTOCOL_VERSION_v311;
 	}
 
-	if (opt->parallel == 0 ) {
+	if (opt->parallel == 0) {
 		opt->parallel = 32;
 	}
 
@@ -300,7 +325,7 @@ alloc_work(nng_socket sock)
 	int          rv;
 
 	if ((w = nng_alloc(sizeof(*w))) == NULL) {
-		fatal("nng_alloc: %s", nng_strerror( NNG_ENOMEM));
+		fatal("nng_alloc: %s", nng_strerror(NNG_ENOMEM));
 	}
 	if ((rv = nng_aio_alloc(&w->aio, client_cb, w)) != 0) {
 		fatal("nng_aio_alloc: %s", nng_strerror(rv));
@@ -316,8 +341,8 @@ alloc_work(nng_socket sock)
 void
 connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	nng_socket *sock = arg;
-	int reason = -1;
+	nng_socket *sock   = arg;
+	int         reason = -1;
 	// get connect reason
 	nng_pipe_get_int(p, NNG_OPT_MQTT_CONNECT_REASON, &reason);
 	// get property for MQTT V5
@@ -344,14 +369,19 @@ connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 			},
 		};
 
-		nng_mqtt_cb_opt cb_opt = {
-			.sub_ack_cb = sub_callback,
-		};
+		size_t count =
+		    sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos);
+		nng_mqtt_topic_qos *topics_qos =
+		    nng_mqtt_topic_qos_array_create(count);
 
-		nng_mqtt_client *client =
-		    nng_mqtt_client_alloc(sock, &cb_opt, true);
-		nng_mqtt_subscribe_async(client, subscriptions,
-		    sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
+		for (size_t i = 0; i < count; i++) {
+			nng_mqtt_topic_qos_array_set(topics_qos, i,
+			    (char *) subscriptions[i].topic.buf,
+			    subscriptions[i].topic.length,
+			    subscriptions[i].qos, 1, 0, 0);
+		}
+		nng_mqtt_subscribe(*sock, topics_qos, count, NULL);
+		nng_mqtt_topic_qos_array_free(topics_qos, count);
 	}
 }
 
@@ -359,36 +389,19 @@ connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 static void
 disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	int reason = 0;
+	nng_socket *  sock   = arg;
+	int           reason = -1;
+	static size_t count  = 0;
 	// get connect reason
 	nng_pipe_get_int(p, NNG_OPT_MQTT_DISCONNECT_REASON, &reason);
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_DISCONNECT_PROPERTY, &prop);
-	printf("%s: disconnected!\n", __FUNCTION__);
-}
 
-static void
-sub_callback(void *arg)
-{
-	nng_mqtt_client *client = (nng_mqtt_client *) arg;
-	nng_aio *        aio    = client->sub_aio;
-	nng_msg *        msg    = nng_aio_get_msg(aio);
-
-	// Do not forget to judge if msg is NULL or not
-	if (msg != NULL) {
-		uint32_t count = 0;
-		uint8_t *codes;
-		codes = (uint8_t *) nng_mqtt_msg_get_suback_return_codes(
-		    msg, &count);
-
-		printf("%s: suback: ", __FUNCTION__);
-		for (uint32_t i = 0; i < count; i++) {
-			printf("[%d] ", codes[i]);
-		}
-		printf("\n");
-
-		nng_msg_free(msg);
-		nng_mqtt_client_free(client, true);
+	count++;
+	printf("%s: disconnected! (reason: %d) (times: %zu) [sock: %p]\n",
+	    __FUNCTION__, reason, count, sock);
+	if (count >= 15) {
+		printf("disconnect times: %zu, sock: [%p]\n", count, sock);
 	}
 }
 
@@ -433,11 +446,11 @@ client(client_opts *opts)
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 	nng_mqtt_msg_set_connect_clean_session(msg, false);
 	nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
-	nng_mqtt_msg_set_connect_user_name(msg, "admin");
-	nng_mqtt_msg_set_connect_password(msg, "public");
+	nng_mqtt_msg_set_connect_user_name(msg, opts->username);
+	nng_mqtt_msg_set_connect_password(msg, opts->password);
 
 	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
-	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
+	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, &sock);
 
 	if ((rv = nng_dialer_create(&dialer, sock, opts->url)) != 0) {
 		fatal("nng_dialer_create: %s", nng_strerror(rv));
@@ -451,7 +464,9 @@ client(client_opts *opts)
 	}
 
 	nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
-	nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
+	if ((rv = nng_dialer_start(dialer, NNG_FLAG_ALLOC)) != 0) {
+		fatal("nng_dialer_start: %s", nng_strerror(rv));
+	}
 
 	for (i = 0; i < opts->parallel; i++) {
 		client_cb(works[i]);
@@ -546,7 +561,7 @@ init_dialer_tls(nng_dialer d, const char *cacert, const char *cert,
 			goto out;
 		}
 	} else {
-		nng_tls_config_auth_mode(cfg, NNG_TLS_AUTH_MODE_NONE);
+		nng_tls_config_auth_mode(cfg, NNG_TLS_AUTH_MODE_OPTIONAL);
 	}
 
 	if (cacert != NULL) {
@@ -574,8 +589,11 @@ usage(void)
 	       "mqtt-tcp://127.0.0.1:1883]\n");
 	printf("    -n, --parallel   <number of works> (default: 32)\n");
 	printf("    -v, --version    <mqtt version> (default: 4)\n");
+	printf("    -u, --username   <username>\n");
+	printf("    -P, --password   <password>\n");
 	printf("    --sqlite         enable sqlite cache (default: false)\n");
-	printf("    -s, --secure     enable ssl/tls mode (default: disable)\n");
+	printf(
+	    "    -s, --secure     enable ssl/tls mode (default: disable)\n");
 	printf("    --cacert         <cafile path>\n");
 	printf("    -E, --cert       <cert file path>\n");
 	printf("    --key            <key file path>\n");
@@ -585,7 +603,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-	int    rc;
+	int rc;
 
 	client_opts opts = { 0 };
 
