@@ -2,6 +2,7 @@ import random
 import time
 import json
 import wifi
+import ssl
 
 from umqtt.simple import MQTTClient
 
@@ -17,7 +18,12 @@ def on_message(topic, msg):
         payload=msg.decode(), topic=topic.decode()))
 
 def connect():
-    client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl = True)
+    with open('broker.emqx.io-ca.crt', 'rb') as f:
+        cadata = f.read()
+    ssl_params = dict()
+    ssl_params["cert_reqs"] = ssl.CERT_REQUIRED
+    ssl_params["cadata"] = cadata
+    client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl = True, ssl_params = ssl_params)
     client.connect()
     print('Connected to MQTT Broker "{server}"'.format(server=SERVER))
     return client
