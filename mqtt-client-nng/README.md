@@ -21,6 +21,7 @@ ninja install
 ```c
 nng_socket sock;
 nng_mqtt_client_open(&sock);
+nng_mqttv5_client_open(&sock);
 ```
 
 ### 创建work
@@ -83,37 +84,6 @@ if (opts->enable_ssl) {
 
 nng_dialer_set_ptr(dialer, NNG_OPT_MQTT_CONNMSG, msg);
 nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
-
-```
-
-
-### 订阅Topic
-
-```c
- nng_mqtt_topic_qos subscriptions[] = {
-   {
-       .qos   = 1,
-       .topic = { 
-     .buf    = (uint8_t *) SUB_TOPIC1,
-           .length = strlen(SUB_TOPIC1), 
-    },
-   },
-   {
-       .qos   = 2,
-       .topic = { 
-     .buf    = (uint8_t *) SUB_TOPIC2,
-           .length = strlen(SUB_TOPIC2), 
-    },
-   },
-  };
-
- nng_mqtt_cb_opt cb_opt = {
-  .sub_ack_cb = sub_callback,
- };
-
- nng_mqtt_client *client = nng_mqtt_client_alloc(sock, &cb_opt, true);
- nng_mqtt_subscribe_async(client, subscriptions,
-     sizeof(subscriptions) / sizeof(nng_mqtt_topic_qos), NULL);
 
 ```
 
