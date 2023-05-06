@@ -1,24 +1,24 @@
 # NanoSDK
 
-> [中文](./README_ZH.md)
+> [English](./README.md)
 
-### Install NanoSDK library
+### 安装NanoSDK库
 
 ```shell
 git clone https://github.com/emqx/NanoSDK
 cd NanoSDK
-mkdir build 
+mkdir build
 cd build
 cmake -G Ninja ..
-# Build with TLS: 
+# 编译TLS: 
 # cmake -G Ninja -DNNG_ENABLE_TLS=ON ..
-# Build with SQLITE: 
+# 编译SQLITE: 
 # cmake -G Ninja -DNNG_ENABLE_SQLITE=ON ..
 ninja
 ninja install
 ```
 
-### Open and create nng_socket
+### 创建nng_socket
 
 ```c
 nng_socket sock;
@@ -26,9 +26,9 @@ nng_mqtt_client_open(&sock);
 nng_mqttv5_client_open(&sock);
 ```
 
-### Create work
+### 创建work
 
-#### work struct
+#### work定义
 
 ```c
 struct work {
@@ -39,7 +39,7 @@ struct work {
 };
 ```
 
-#### Create works for socket
+#### 为socket创建n个work
 
 ```c
 static size_t nwork = 32;
@@ -51,7 +51,7 @@ for (i = 0; i < nwork; i++) {
 }
 ```
 
-#### Initialize connect message
+### 创建并设置mqtt connect消息体
 
 ```c
 nng_msg *msg;
@@ -60,15 +60,16 @@ nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_CONNECT);
 nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 nng_mqtt_msg_set_connect_clean_session(msg, true);
 nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
-nng_mqtt_msg_set_connect_user_name(msg, "admin");
-nng_mqtt_msg_set_connect_password(msg, "public");
+ nng_mqtt_msg_set_connect_user_name(msg, "admin");
+ nng_mqtt_msg_set_connect_password(msg, "public");
 ```
 
 
 
-### Initialize nng_dialer
+### 创建并设置nng_dialer
 
 ```c
+
 nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
 nng_mqtt_set_disconnect_cb(sock, disconnect_cb, NULL);
 
@@ -89,7 +90,15 @@ nng_dialer_start(dialer, NNG_FLAG_NONBLOCK);
 ```
 
 
-### State callback function
+### 状态机回调函数
+
+> 本实例演示从初始INIT状态进入到RECV状态后进入数据接收状态
+>
+> RECV状态中获取收到的PUBLISH数据
+>
+> WAIT状态中进行清理nng_msg并重用，组装一个PUBLISH消息，设置SEND状态并进入发送回调
+>
+> SEND状态获取发送结果，并返回到RECV状态中
 
 ```c
 void
@@ -172,8 +181,7 @@ client_cb(void *arg)
 }
 ```
 
-### Start callback function
-
+### 启动回调函数
 ```c
 for (i = 0; i < nwork; i++) {
     client_cb(works[i]);
@@ -184,15 +192,14 @@ for (;;) {
 }
 ```
 
-### Building and Running
-
+### 工程编译及运行
 ```shell
 mkdir build
 cd build
 cmake -G Ninja ..
-# Build with TLS: 
+# 编译TLS: 
 # cmake -G Ninja -DNNG_ENABLE_TLS=ON ..
-# Build with SQLITE: 
+# 编译SQLITE: 
 # cmake -G Ninja -DNNG_ENABLE_SQLITE=ON ..
 ninja
 ```
@@ -226,16 +233,14 @@ mqtt_async:
 ./mqtt_async --url "tls+mqtt-tcp://127.0.0.1:8883" -s --cacert ca.crt --cert server.crt --key server.key 
 ```
 
-### NanoSDK Implementation case
-
+### NanoSDK实现案例
 [nanomq_cli](https://github.com/emqx/nanomq/tree/master/nanomq_cli)
 
-### Project source
+### 完整代码工程
 
-[mqtt-client-C-nng](https://github.com/emqx/MQTT-Client-Examples/tree/master/mqtt-client-nng)
+[mqtt-client-nng](https://github.com/emqx/MQTT-Client-Examples/tree/master/mqtt-client-nng)
 
 
-### NanoSDK source
-
+### NanoSDK源码
 [NanoSDK](https://github.com/emqx/NanoSDK)
 
