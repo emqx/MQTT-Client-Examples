@@ -389,20 +389,14 @@ connect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 static void
 disconnect_cb(nng_pipe p, nng_pipe_ev ev, void *arg)
 {
-	nng_socket *  sock   = arg;
-	int           reason = -1;
-	static size_t count  = 0;
+	nng_socket *sock   = arg;
+	int         reason = -1;
 	// get connect reason
 	nng_pipe_get_int(p, NNG_OPT_MQTT_DISCONNECT_REASON, &reason);
 	// property *prop;
 	// nng_pipe_get_ptr(p, NNG_OPT_MQTT_DISCONNECT_PROPERTY, &prop);
 
-	count++;
-	printf("%s: disconnected! (reason: %d) (times: %zu) [sock: %p]\n",
-	    __FUNCTION__, reason, count, sock);
-	if (count >= 15) {
-		printf("disconnect times: %zu, sock: [%p]\n", count, sock);
-	}
+	printf("%s: disconnected! (reason: %d) \n", __FUNCTION__, reason);
 }
 
 int
@@ -446,8 +440,13 @@ client(client_opts *opts)
 	nng_mqtt_msg_set_connect_keep_alive(msg, 60);
 	nng_mqtt_msg_set_connect_clean_session(msg, false);
 	nng_mqtt_msg_set_connect_proto_version(msg, opts->version);
-	nng_mqtt_msg_set_connect_user_name(msg, opts->username);
-	nng_mqtt_msg_set_connect_password(msg, opts->password);
+
+	if (opts->username != NULL) {
+		nng_mqtt_msg_set_connect_user_name(msg, opts->username);
+	}
+	if (opts->password != NULL) {
+		nng_mqtt_msg_set_connect_password(msg, opts->password);
+	}
 
 	nng_mqtt_set_connect_cb(sock, connect_cb, &sock);
 	nng_mqtt_set_disconnect_cb(sock, disconnect_cb, &sock);
