@@ -2,8 +2,8 @@ const mqtt = require('mqtt')
 /* 
   choose which protocol to use for connection here 
 */
-const { connectOptions } = require('./use_mqtt.js')
-// const { connectOptions } = require('./use_mqtts.js')
+// const { connectOptions } = require('./use_mqtt.js')
+const { connectOptions } = require('./use_mqtts.js')
 // const { connectOptions } = require('./use_ws.js')
 // const { connectOptions } = require('./use_wss.js')
 
@@ -29,6 +29,8 @@ const options = {
   username: 'emqx_test',
   password: 'emqx_test',
   reconnectPeriod: 1000,
+  // Enable the SSL/TLS, whether a client verifies the server's certificate chain and host name
+  rejectUnauthorized: true,
   // for more options and details, please refer to https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
 }
 
@@ -47,6 +49,15 @@ if (['ws', 'wss'].includes(protocol)) {
   // mqtt: MQTT-WebSocket uniformly uses /path as the connection path,
   // which should be specified when connecting, and the path used on EMQX is /mqtt.
   connectUrl += '/mqtt'
+}
+
+/**
+ * If you are using mutual (two-way) TLS authentication, you need to pass the CA, client certificate, and client private key.
+ */
+if (['mqtts', 'wss'].includes(protocol)) {
+  options['ca'] = fs.readFileSync('./path/to/your/ca.crt')
+  options['key'] = fs.readFileSync('./path/to/your/client.key')
+  options['cert'] = fs.readFileSync('./path/to/your/client.crt')
 }
 
 const client = mqtt.connect(connectUrl, options)
