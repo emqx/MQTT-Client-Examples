@@ -37,17 +37,6 @@ func main() {
 	key := flag.String("key", "",
 		"client certificate for authentication, if required by server.")
 
-	*host = "112.124.58.203"
-	*port = 8883
-	//*Protocol = "mqtts"
-	*topic = "golang-mqtt/test"
-	*username = "emqx"
-	*password = "public"
-	//*cafile = "../pubsub/cn.emqx.cloud-ca.crt"
-	*cafile = "./server/server.crt"
-	*cert = "./client/client.crt"
-	*key = "./client/client.key"
-
 	flag.Parse()
 
 	config := ConConfig{
@@ -60,7 +49,7 @@ func main() {
 		Key:      *key,
 	}
 	client := mqttConnect(&config)
-	//go sub(client, &config)
+	go sub(client, &config)
 	publish(client, &config)
 }
 
@@ -72,7 +61,7 @@ func publish(client mqtt.Client, config *ConConfig) {
 			if token.Error() != nil {
 				log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
 			} else {
-				log.Printf("pub [%s] %s\n", config.Topic, payload)
+				log.Printf("pub %s to topic [%s]\n", payload, config.Topic)
 			}
 		}
 		time.Sleep(1 * time.Second)
@@ -88,7 +77,7 @@ func sub(client mqtt.Client, config *ConConfig) {
 	}
 	ack := token.WaitTimeout(3 * time.Second)
 	if !ack {
-		log.Printf("sub message to topic timeout: %s \n", config.Topic)
+		log.Printf("sub to topic timeout: %s \n", config.Topic)
 	}
 }
 

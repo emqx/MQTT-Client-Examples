@@ -49,7 +49,7 @@ func main() {
 	client.Disconnect(250)
 	// Deal with existing work
 	log.Println("Disconnected from MQTT broker")
-	//go sub(client, &config)
+	go subscribe(client, &config)
 	publish(client, &config)
 }
 
@@ -71,7 +71,7 @@ func publish(client mqtt.Client, config *ConConfig) {
 			if token.Error() != nil {
 				log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
 			} else {
-				log.Printf("pub [%s] %s\n", config.Topic, payload)
+				log.Printf("pub %s to topic [%s]\n", payload, config.Topic)
 			}
 		}
 		time.Sleep(1 * time.Second)
@@ -84,7 +84,7 @@ func subscribe(client mqtt.Client, config *ConConfig) {
 	})
 	ack := token.WaitTimeout(3 * time.Second)
 	if !ack {
-		log.Printf("sub message to topic timeout: %s \n", config.Topic)
+		log.Printf("sub to topic timeout: %s \n", config.Topic)
 	}
 	if err := token.Error(); err != nil {
 		log.Printf("sub to message error from topic:%s \n", config.Topic)

@@ -18,7 +18,7 @@ func Pub(client mqtt.Client, topic string) {
 			if token.Error() != nil {
 				log.Printf("pub message to topic %s error:%s \n", topic, token.Error())
 			} else {
-				log.Printf("pub [%s] %s\n", topic, payload)
+				log.Printf("pub %s to topic [%s]\n", payload, topic)
 			}
 		}
 		i += 1
@@ -29,11 +29,9 @@ func Pub(client mqtt.Client, topic string) {
 func Sub(client mqtt.Client, topic string) {
 	subClient := client
 	for !ExitFlag {
-		//if !subClient.IsConnectionOpen() {
 		subClient.Subscribe(topic, 0, func(subClient mqtt.Client, msg mqtt.Message) {
 			log.Printf("sub [%s] %s\n", msg.Topic(), string(msg.Payload()))
 		})
-		//}
 		time.Sleep(1 * time.Second)
 	}
 }
