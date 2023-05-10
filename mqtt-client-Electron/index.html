@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" type="text/css" href="node_modules/bulma/css/bulma.css" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="node_modules/bulma/css/bulma.css"
+    />
     <link rel="stylesheet" type="text/css" href="./main.css" />
     <title>Electron MQTT</title>
   </head>
@@ -13,9 +23,7 @@
     <div class="main">
       <div class="card connection">
         <header class="card-header">
-          <h1 class="card-header-title">
-            Connection
-          </h1>
+          <h1 class="card-header-title">Connection</h1>
         </header>
         <div class="card-content">
           <form name="connection" class="content">
@@ -24,7 +32,7 @@
                 <label class="label">Protocol</label>
                 <div class="control">
                   <div class="select">
-                    <select name="protocol" id="protocolSelect"> 
+                    <select name="protocol" id="protocol-select">
                       <option value="mqtt">mqtt</option>
                       <option value="mqtts">mqtts</option>
                       <option value="ws">ws</option>
@@ -36,19 +44,35 @@
               <div class="column">
                 <label class="label">Host</label>
                 <div class="control">
-                  <input class="input" name="host" type="text" value="broker.emqx.io">
+                  <input
+                    class="input"
+                    name="host"
+                    type="text"
+                    value="broker.emqx.io"
+                  />
                 </div>
               </div>
               <div class="column">
                 <label class="label">Port</label>
                 <div class="control">
-                  <input class="input" name="port" type="text" value="1883" type="number">
+                  <input
+                    class="input"
+                    name="port"
+                    type="text"
+                    value="1883"
+                    type="number"
+                  />
                 </div>
               </div>
               <div class="column">
                 <label class="label">Client ID</label>
                 <div class="control">
-                  <input class="input" name="clientId" type="text" value="mqttjs_6dd84101">
+                  <input
+                    class="input"
+                    name="clientId"
+                    type="text"
+                    value="emqx_electron_791d3123"
+                  />
                 </div>
               </div>
             </div>
@@ -56,43 +80,110 @@
               <div class="column">
                 <label class="label">Username</label>
                 <div class="control">
-                  <input class="input" name="username" type="text">
+                  <input class="input" name="username" type="text" />
                 </div>
               </div>
               <div class="column">
                 <label class="label">Password</label>
                 <div class="control">
-                  <input class="input" name="password" type="text">
+                  <input class="input" name="password" type="text" />
                 </div>
               </div>
-              <div class="column" id="pathIpt">
+              <div class="column" id="path-ipt">
                 <label class="label">Path</label>
                 <div class="control">
-                  <input class="input" name="path" type="text" value="/mqtt">
+                  <input class="input" name="path" type="text" value="/mqtt" />
+                </div>
+              </div>
+            </div>
+            <div class="columns" id="file-area">
+              <div class="column">
+                <label class="label">CA File</label>
+                <div class="file">
+                  <label class="file-label">
+                    <input
+                      class="file-input"
+                      type="file"
+                      name="resume"
+                      id="ca"
+                    />
+                    <span class="file-cta">
+                      <span class="file-label"> Choose a file… </span>
+                    </span>
+                    <span class="file-name" id="caFileName"> No File </span>
+                  </label>
+                </div>
+              </div>
+              <div class="column">
+                <label class="label">Client Certificate File</label>
+                <div class="file">
+                  <label class="file-label">
+                    <input
+                      class="file-input"
+                      type="file"
+                      name="resume"
+                      id="client-cert"
+                    />
+                    <span class="file-cta">
+                      <span class="file-label"> Choose a file… </span>
+                    </span>
+                    <span class="file-name" id="client-cert-file-name">
+                      No File
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <div class="column">
+                <label class="label">Client Key File</label>
+                <div class="file">
+                  <label class="file-label">
+                    <input
+                      class="file-input"
+                      type="file"
+                      name="resume"
+                      id="clientKey"
+                    />
+                    <span class="file-cta">
+                      <span class="file-label"> Choose a file… </span>
+                    </span>
+                    <span class="file-name" id="client-key-file-name">
+                      No File
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>
           </form>
         </div>
         <footer class="card-footer">
-          <button id="connectBtn" class="card-footer-item button is-primary">Connect</button>
-          <button id="disconnectBtn" class="card-footer-item button is-danger is-light">Disconnect</button>
+          <button id="connect-btn" class="card-footer-item button is-primary">
+            Connect
+          </button>
+          <button
+            id="disconnect-btn"
+            class="card-footer-item button is-danger is-light"
+          >
+            Disconnect
+          </button>
         </footer>
       </div>
       <div class="mqtt-sub-pub columns">
         <div class="column">
           <div class="card subscriber">
             <header class="card-header">
-              <p class="card-header-title">
-                Subscriber
-              </p>
+              <p class="card-header-title">Subscriber</p>
             </header>
             <div class="card-content">
-              <form name='subscriber' class="content">
+              <form name="subscriber" class="content">
                 <div class="field">
                   <label class="label">Topic</label>
                   <div class="control">
-                    <input name="topic" class="input" type="text" value="testtopic/electron">
+                    <input
+                      name="topic"
+                      class="input"
+                      type="text"
+                      value="testtopic/electron"
+                    />
                   </div>
                 </div>
                 <div class="field">
@@ -110,10 +201,20 @@
               </form>
               <div class="field is-grouped">
                 <p class="control">
-                  <button id="subBtn" class="card-footer-item button is-primary">Subscribe</button>
+                  <button
+                    id="sub-btn"
+                    class="card-footer-item button is-primary"
+                  >
+                    Subscribe
+                  </button>
                 </p>
                 <p class="control">
-                  <button id="unsubBtn" class="card-footer-item button is-danger is-light">Unsubscribe</button>
+                  <button
+                    id="unsub-btn"
+                    class="card-footer-item button is-danger is-light"
+                  >
+                    Unsubscribe
+                  </button>
                 </p>
               </div>
             </div>
@@ -122,16 +223,19 @@
         <div class="column">
           <div class="card publisher">
             <header class="card-header">
-              <p class="card-header-title">
-                Publisher
-              </p>
+              <p class="card-header-title">Publisher</p>
             </header>
             <div class="card-content">
               <form name="publisher" class="content">
                 <div class="field">
                   <label class="label">Topic</label>
                   <div class="control">
-                    <input name="topic" class="input" type="text" value="testtopic/electron">
+                    <input
+                      name="topic"
+                      class="input"
+                      type="text"
+                      value="testtopic/electron"
+                    />
                   </div>
                 </div>
                 <div class="field">
@@ -149,13 +253,23 @@
                 <div class="field">
                   <label class="label">Payload</label>
                   <div class="control">
-                    <textarea name="payload" class="textarea" rows="2" placeholder="e.g. Electron connection demo...!"></textarea>
+                    <textarea
+                      name="payload"
+                      class="textarea"
+                      rows="2"
+                      placeholder="e.g. Electron connection demo...!"
+                    ></textarea>
                   </div>
                 </div>
               </form>
               <div class="field is-grouped">
                 <p class="control">
-                  <button id="sendBtn" class="card-footer-item button is-primary">Send</button>
+                  <button
+                    id="send-btn"
+                    class="card-footer-item button is-primary"
+                  >
+                    Send
+                  </button>
                 </p>
               </div>
             </div>
@@ -164,14 +278,11 @@
         <div class="column">
           <div class="card receiver">
             <header class="card-header">
-              <h1 class="card-header-title">
-                Receiver
-              </h1>
+              <h1 class="card-header-title">Receiver</h1>
             </header>
             <div class="card-content">
               <div class="content">
-                <article id="article" class="message is-success">
-                </article>
+                <article id="article" class="message is-success"></article>
               </div>
             </div>
           </div>

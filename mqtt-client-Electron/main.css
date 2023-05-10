@@ -16,6 +16,10 @@
   width: 100%;
 }
 
-#pathIpt {
+#path-ipt {
+  display: none;
+}
+
+#file-area {
   display: none;
 }
