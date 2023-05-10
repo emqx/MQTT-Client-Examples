@@ -5,10 +5,11 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type ConConfig struct {
@@ -39,37 +40,56 @@ func main() {
 		Cafile:   *cafile,
 	}
 	client := mqttConnect(&config)
-	go sub(client, &config)
-	publish(client, &config)
+	go publish(client, &config)
+	time.Sleep(3 * time.Second)
+	unSubscribe(client, &config)
+	time.Sleep(3 * time.Second)
+	client.Disconnect(250)
+	// Deal with existing work
+	log.Println("Disconnected from MQTT broker")
 }
 
 func publish(client mqtt.Client, config *ConConfig) {
 	for {
 		payload := "The current time " + time.Now().String()
 		token := client.Publish(config.Topic, 0, false, payload)
-		if token.Error() != nil {
-			log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
-		}
 		ack := token.WaitTimeout(3 * time.Second)
 		if !ack {
 			log.Printf("pub message to topic %s timeout \n", config.Topic)
+		}
+		if token.Error() != nil {
+			log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
+			return
 		}
 		log.Printf("pub [%s] %s\n", config.Topic, payload)
 		time.Sleep(1 * time.Second)
 	}
 }
 
-func sub(client mqtt.Client, config *ConConfig) {
+func subscribe(client mqtt.Client, config *ConConfig) {
 	token := client.Subscribe(config.Topic, 0, func(client mqtt.Client, msg mqtt.Message) {
 		log.Printf("sub [%s] %s\n", msg.Topic(), string(msg.Payload()))
 	})
-	if token.Error() != nil {
-		log.Printf("sub to message error from topic:%s \n", config.Topic)
-	}
 	ack := token.WaitTimeout(3 * time.Second)
 	if !ack {
-		log.Printf("pub message to topic timeout: %s \n", config.Topic)
+		log.Printf("sub message to topic timeout: %s \n", config.Topic)
 	}
+	if err := token.Error(); err != nil {
+		log.Printf("sub to message error from topic:%s \n", config.Topic)
+	}
+	log.Printf("Subscribe to topic:%s successfully\n", config.Topic)
+}
+
+func unSubscribe(client mqtt.Client, config *ConConfig) {
+	token := client.Unsubscribe(config.Topic)
+	ack := token.WaitTimeout(3 * time.Second)
+	if !ack {
+		log.Printf("unsub from topic timeout: %s \n", config.Topic)
+	}
+	if token.Error() != nil {
+		log.Printf("unsub error from topic:%s \n", config.Topic)
+	}
+	log.Printf("Unsubscribe from topic:%s successfully\n", config.Topic)
 }
 
 func mqttConnect(config *ConConfig) mqtt.Client {
@@ -78,6 +98,14 @@ func mqttConnect(config *ConConfig) mqtt.Client {
 	opts.SetUsername(config.Username)
 	opts.SetPassword(config.Password)
 	opts.TLSConfig = loadTLSConfig(config)
+	opts.OnConnect = func(client mqtt.Client) {
+		log.Println("Connected to MQTT broker")
+		subscribe(client, config)
+	}
+	opts.OnConnectionLost = func(client mqtt.Client, err error) {
+		log.Println("Disconnected from MQTT broker")
+	}
+
 	client := mqtt.NewClient(opts)
 	token := client.Connect()
 	ack := token.WaitTimeout(5 * time.Second)
@@ -94,7 +122,7 @@ func loadTLSConfig(config *ConConfig) *tls.Config {
 	tlsConfig.InsecureSkipVerify = false
 	if config.Cafile != "" {
 		certpool := x509.NewCertPool()
-		ca, err := ioutil.ReadFile(config.Cafile)
+		ca, err := os.ReadFile(config.Cafile)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
