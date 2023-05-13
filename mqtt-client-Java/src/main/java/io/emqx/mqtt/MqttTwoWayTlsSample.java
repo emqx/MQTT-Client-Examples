@@ -155,7 +155,7 @@ public class MqttTwoWayTlsSample {
 	 }
 	 
 	 /*
-	  * Load private key from PEM using with help of bouncy castle
+	  * Load private key from PEM with help of bouncy castle
 	  * RSA/DSA private keys are supported
 	  */
 	 public static PrivateKey loadKey(File keyFile) throws Exception {
