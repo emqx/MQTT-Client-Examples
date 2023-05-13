@@ -6,20 +6,24 @@
 ## 编译
 ```
 mvn compile
-``` 
+```
 
-## 运行
+## 运行双向 TLS 认证示例
+
+```bash
+mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttTwoWayTlsSample"
+```
+
+## 运行 MqttExample
+
 ```bash
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample"
 
-# TLS
-mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b ssl://broker.emqx.io:8883"
+# TCP
+mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b tcp://broker.emqx.io:1883"
 
 # Websocket
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b ws://broker.emqx.io:8083/mqtt"
-
-# Websocket over TLS
-mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttExample" -Dexec.args="-b wss://broker.emqx.io:8084/mqtt"
 ```
 
 参数：
