@@ -37,6 +37,9 @@ micropython -m upip install umqtt.simple
 ```bash
 micropython sub.py
 micropython pub.py
+# tls
+micropython sub-tls.py
+micropython pub-tls.py
 ```
 
 ## Other

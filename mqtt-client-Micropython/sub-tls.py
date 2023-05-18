@@ -1,19 +1,20 @@
-# sub.py
+# sub-tls.py
 import time
+import ussl
 from umqtt.simple import MQTTClient
 
 SERVER="broker.emqx.io"
 ClientID = f'raspberry-sub-{time.time_ns()}'
 user = "emqx"
 password = "public"
-topic = "raspberry/mqtt"
-msg = b'{"msg":"hello"}'
+topic = b'raspberry/mqtt'
+msg = b"hello"
 
 def sub(topic, msg):
     print('received message %s on topic %s' % (msg, topic))
 
 def main(server=SERVER):
-    client = MQTTClient(ClientID, server, 1883, user, password)
+    client = MQTTClient(ClientID, server, 8883, user, password, ssl=True, ssl_params={'server_hostname': server})
     client.set_callback(sub)
     client.connect()
     print('Connected to MQTT Broker "%s"' % (server))
