@@ -21,6 +21,7 @@ def connect():
     with open('broker.emqx.io-ca.crt', 'rb') as f:
         cadata = f.read()
     ssl_params = dict()
+    ssl_params["server_hostname"] = SERVER
     ssl_params["cert_reqs"] = ssl.CERT_REQUIRED
     ssl_params["cadata"] = cadata
     client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl = True, ssl_params = ssl_params)
