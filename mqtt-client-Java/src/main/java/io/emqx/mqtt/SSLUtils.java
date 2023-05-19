@@ -19,9 +19,11 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SSLUtils {
 
-    public static SSLSocketFactory getSingleSocketFactory(InputStream caCrtFileInputStream) throws Exception {
+    public static SSLSocketFactory getSingleSocketFactory(final String caCrtFile) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         X509Certificate caCert = null;
+
+        FileInputStream caCrtFileInputStream = new FileInputStream(caCrtFile);
 
         BufferedInputStream bis = new BufferedInputStream(caCrtFileInputStream);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
