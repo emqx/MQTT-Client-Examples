@@ -24,7 +24,7 @@ public class MqttOneWayTlsSample {
     private static final String TOPIC = "java-mqtt/tls";
     private static final int QoS = 1;
     private static final String PAYLOAD = "Enjoy the sample";
-    private static final String CA_CERT_PATH = "./broker.emqx.io-ca.crt";
+    private static final String CA_CERT_PATH = MqttOneWayTlsSample.class.getResource("").getPath()+"./broker.emqx.io-ca.crt";
 
     public static void main(String args[]) {
         MqttClient client = null;
