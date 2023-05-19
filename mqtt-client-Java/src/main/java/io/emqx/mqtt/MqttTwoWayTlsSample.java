@@ -36,7 +36,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MqttTwoWayTlsSample {
 	
-	private static final String BROKER = "broker.emqx.io";
+	private static final String BROKER = "example.emqx.io";
 	private static final String PORT = "8883";
 	private static final String CLIENT_ID = MqttClient.generateClientId();
 	private static final String USERNAME = "emqx";

@@ -8,6 +8,12 @@
 mvn compile
 ```
 
+## Run one way TLS authentication sample
+
+```bash
+mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttOneWayTlsSample"
+```
+
 ## Run two way TLS authentication sample
 
 ```bash
