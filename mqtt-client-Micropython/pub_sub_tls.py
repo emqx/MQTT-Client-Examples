@@ -1,32 +1,32 @@
-import random
-import time
 import json
-import wifi
+import random
 import ssl
+import time
+import wifi
 
 from umqtt.simple import MQTTClient
 
 SERVER = "broker.emqx.io"
 PORT = 8883
-CLIENT_ID = 'micropython-client-{id}'.format(id=random.getrandbits(8))
+CLIENT_ID = 'micropython-client-{id}'.format(id = random.getrandbits(8))
 USERNAME = 'emqx'
 PASSWORD = 'public'
 TOPIC = "raspberry/mqtt"
 
 def on_message(topic, msg):
     print("Received '{payload}' from topic '{topic}'\n".format(
-        payload=msg.decode(), topic=topic.decode()))
+        payload = msg.decode(), topic = topic.decode()))
 
 def connect():
     with open('broker.emqx.io-ca.crt', 'rb') as f:
         cadata = f.read()
     ssl_params = dict()
-    ssl_params["server_hostname"] = SERVER
     ssl_params["cert_reqs"] = ssl.CERT_REQUIRED
     ssl_params["cadata"] = cadata
+    ssl_params["server_hostname"] = SERVER
     client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl = True, ssl_params = ssl_params)
     client.connect()
-    print('Connected to MQTT Broker "{server}"'.format(server=SERVER))
+    print('Connected to MQTT Broker "{server}"'.format(server = SERVER))
     return client
 
 def subscribe(client):
@@ -41,7 +41,7 @@ def loop_publish(client):
         }
         msg = json.dumps(msg_dict)
         result = client.publish(TOPIC, msg)
-        print("Send '{msg}' to topic '{topic}'".format(msg=msg, topic=TOPIC))
+        print("Send '{msg}' to topic '{topic}'".format(msg = msg, topic = TOPIC))
         client.wait_msg()
         msg_count += 1
         time.sleep(1)
