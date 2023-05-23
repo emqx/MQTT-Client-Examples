@@ -5,10 +5,11 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"io/ioutil"
 	"log"
 	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type ConConfig struct {
@@ -20,6 +21,8 @@ type ConConfig struct {
 	Cert     string
 	Key      string
 }
+
+var ExitFlag bool = false
 
 func main() {
 	host := flag.String("host", "127.0.0.1", "server hostname or IP")
@@ -33,6 +36,7 @@ func main() {
 		"client certificate for authentication, if required by server.")
 	key := flag.String("key", "",
 		"client certificate for authentication, if required by server.")
+
 	flag.Parse()
 
 	config := ConConfig{
@@ -50,17 +54,16 @@ func main() {
 }
 
 func publish(client mqtt.Client, config *ConConfig) {
-	for {
-		payload := "The current time" + time.Now().Format(time.RFC3339)
-		token := client.Publish(config.Topic, 0, false, payload)
-		if token.Error() != nil {
-			log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
+	for !ExitFlag {
+		payload := "The current time " + time.Now().String()
+		if client.IsConnectionOpen() {
+			token := client.Publish(config.Topic, 0, false, payload)
+			if token.Error() != nil {
+				log.Printf("pub message to topic %s error:%s \n", config.Topic, token.Error())
+			} else {
+				log.Printf("pub %s to topic [%s]\n", payload, config.Topic)
+			}
 		}
-		ack := token.WaitTimeout(3 * time.Second)
-		if !ack {
-			log.Printf("pub message to topic %s timeout \n", config.Topic)
-		}
-		log.Printf("pub [%s] %s\n", config.Topic, payload)
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -74,8 +77,41 @@ func sub(client mqtt.Client, config *ConConfig) {
 	}
 	ack := token.WaitTimeout(3 * time.Second)
 	if !ack {
-		log.Printf("pub message to topic timeout: %s \n", config.Topic)
+		log.Printf("sub to topic timeout: %s \n", config.Topic)
 	}
+}
+
+func SetAutoReconnect(config *ConConfig, opts *mqtt.ClientOptions) {
+	firstReconnectDelay, maxReconnectDelay, maxReconnectCount, reconnectRate := 1, 60, 12, 2
+
+	opts.SetOnConnectHandler(func(client mqtt.Client) {
+		sub(client, config)
+		log.Println("Connected to MQTT Broker!")
+	})
+
+	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
+		fmt.Printf("Connection lost: %v\nTrying to reconnect...\n", err)
+
+		reconnectDelay := firstReconnectDelay
+		for i := 0; i < maxReconnectCount; i++ {
+			log.Printf("Reconnecting in %ds.\n", reconnectDelay)
+			time.Sleep(time.Duration(reconnectDelay) * time.Second)
+			if token := client.Connect(); token.Wait() && token.Error() != nil {
+				log.Printf("Failed to reconnect: %v\n", token.Error())
+			} else if client.IsConnectionOpen() {
+				return
+			}
+			if i != maxReconnectCount-1 {
+				log.Println("Reconnect failed, waiting for the next reconnection.")
+			}
+			reconnectDelay *= reconnectRate
+			if reconnectDelay > maxReconnectDelay {
+				reconnectDelay = maxReconnectDelay
+			}
+		}
+		log.Printf("Reconnect failed after %d attempts. Exiting...", maxReconnectCount)
+		ExitFlag = !client.IsConnectionOpen()
+	})
 }
 
 func mqttConnect(config *ConConfig) mqtt.Client {
@@ -84,6 +120,8 @@ func mqttConnect(config *ConConfig) mqtt.Client {
 	opts.SetUsername(config.Username)
 	opts.SetPassword(config.Password)
 	opts.TLSConfig = loadTLSConfig(config)
+	opts.SetKeepAlive(3 * time.Second)
+	SetAutoReconnect(config, opts)
 	client := mqtt.NewClient(opts)
 	token := client.Connect()
 	ack := token.WaitTimeout(5 * time.Second)
