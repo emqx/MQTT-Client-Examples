@@ -1,5 +1,3 @@
-const fs = require('fs')
-
 const connectOptions = {
   protocol: 'wss',
   port: 8084,
