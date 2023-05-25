@@ -1,5 +1,3 @@
-const fs = require('fs')
-
 const connectOptions = {
   protocol: 'mqtts',
   port: 8883,

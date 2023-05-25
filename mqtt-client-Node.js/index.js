@@ -68,14 +68,13 @@ client.on('connect', () => {
       return
     }
     console.log(`${protocol}: Subscribe to topic '${topic}'`)
-  })
-
-  // publish message
-  // https://github.com/mqttjs/MQTT.js#mqttclientpublishtopic-message-options-callback
-  client.publish(topic, payload, { qos }, (error) => {
-    if (error) {
-      console.error(error)
-    }
+    // publish message
+    // https://github.com/mqttjs/MQTT.js#mqttclientpublishtopic-message-options-callback
+    client.publish(topic, payload, { qos }, (error) => {
+      if (error) {
+        console.error(error)
+      }
+    })
   })
 })
 
