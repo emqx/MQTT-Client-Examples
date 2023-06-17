@@ -1,0 +1,65 @@
+import org.gradle.internal.jvm.Jvm
+
+buildscript {
+    ext.kotlin_version = '1.8.20'
+    repositories {
+        mavenCentral()
+        google()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:11.3.2"
+    }
+}
+
+println "Gradle uses Java ${Jvm.current()}"
+
+ext {
+    compileSdkVersion = 33
+    room_version = "2.5.1"
+    logcatVersion = "2.12"
+}
+
+subprojects {
+    apply plugin: "org.jlleitschuh.gradle.ktlint"
+
+    // Optionally configure plugin
+    ktlint {
+        debug = false
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://repo.eclipse.org/content/repositories/paho-releases/" }
+        maven { url 'https://jitpack.io' }
+    }
+
+}
+
+@SuppressWarnings('unused')
+static def getTag() {
+    def tagVersion = "$System.env.VERSION"
+    if (tagVersion.toString().equals("null")) {
+        // with local un-commited changes a -DIRTY is added
+        def processChanges = "git diff-index --name-only HEAD --".execute()
+        def dirty = ""
+        if (!processChanges.text.toString().trim().isEmpty())
+            dirty = "-DIRTY"
+
+        def process = "git describe --tags".execute()
+        tagVersion = process.text.toString().trim() + dirty
+    }
+    return tagVersion
+}
+
+@SuppressWarnings('unused')
+static def getGitCommitCount() {
+    def process = "git rev-list HEAD --count".execute()
+    return process.text
+}

@@ -1,0 +1,423 @@
+<ScrollView android:id="@+id/scrollView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:orientation="vertical"
+    tools:context="info.mqtt.android.extsample.fragments.HomeFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!--                    General Settings                     -->
+
+        <LinearLayout
+            android:id="@+id/client_id_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/generalTextView"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/client_id"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1"
+                android:text="@string/add_connection_client_id_default" />
+
+            <TextView
+                android:id="@+id/client_id_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_client_id_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/server_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider1"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/hostname"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1"
+                android:text="@string/add_connection_server_default" />
+
+            <TextView
+                android:id="@+id/hostname_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_server_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/port_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider2"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/add_connection_port"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="5"
+                android:text="@integer/default_port" />
+
+            <TextView
+                android:id="@+id/message_text"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_port_label" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/username_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/advancedTextView"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1" />
+
+            <TextView
+                android:id="@+id/username_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_username_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/password_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider4"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1"
+                tools:ignore="TextFields" />
+
+            <TextView
+                android:id="@+id/password_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_password_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tls_server_key_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider5"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/tls_server_key"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1" />
+
+            <TextView
+                android:id="@+id/tls_server_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_tls_server_key_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tls_client_key_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tls_server_key_group"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/tls_client_key"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1" />
+
+            <TextView
+                android:id="@+id/tls_client_key_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_tls_client_key_label" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/timeout_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider6"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/timeout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="5"
+                android:text="@integer/default_timeout" />
+
+            <TextView
+                android:id="@+id/timeout_text"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_timeout_label" />
+        </LinearLayout>
+
+        <!--                    Advanced Settings                    -->
+        <!--                    General Settings                     -->
+
+
+        <LinearLayout
+            android:id="@+id/keep_alive_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/divider7"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/keepalive"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="5"
+                android:text="@integer/default_keep_alive" />
+
+            <TextView
+                android:id="@+id/keepalive_text"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_keepalive_label" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/topic_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lwtTextView"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/lwt_topic"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="text"
+                android:lines="1" />
+
+            <TextView
+                android:id="@+id/topic_group_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_lwt_topic_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/lwt_message_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/divider8"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/lwt_message"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:ems="10"
+                android:inputType="textMultiLine"
+                android:lines="4" />
+
+            <TextView
+                android:id="@+id/lwt_message_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_lwt_message_label" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/lwt_qos_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/divider9"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/lwt_qos_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/lwt_qos_label"
+                style="@style/spinnerTextFieldLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_connection_lwt_qos_label" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/clean_session_switch"
+            style="@style/Switch"
+            android:layout_below="@+id/divider3"
+            android:text="@string/add_connection_clean_session_label" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/retain_switch"
+            style="@style/Switch"
+            android:layout_below="@+id/divider10"
+            android:text="@string/add_connection_lwt_retain_label" />
+
+
+        <TextView
+            android:id="@+id/generalTextView"
+            style="@style/HeaderText"
+            android:text="@string/add_connection_general_label" />
+
+        <TextView
+            android:id="@+id/advancedTextView"
+            style="@style/HeaderText"
+            android:layout_below="@+id/clean_session_switch"
+            android:text="@string/add_connection_advanced_label" />
+
+        <TextView
+            android:id="@+id/lwtTextView"
+            style="@style/HeaderText"
+            android:layout_below="@+id/keep_alive_group"
+            android:text="@string/add_connection_lwt_label" />
+
+        <View
+            android:id="@+id/divider1"
+            style="@style/Divider"
+            android:layout_below="@+id/client_id_group" />
+
+        <View
+            android:id="@+id/divider2"
+            style="@style/Divider"
+            android:layout_below="@+id/server_group" />
+
+
+        <!--                  Last Will & Testament                  -->
+
+        <View
+            android:id="@+id/divider3"
+            style="@style/Divider"
+            android:layout_below="@+id/port_group" />
+
+
+        <View
+            android:id="@+id/divider4"
+            style="@style/Divider"
+            android:layout_below="@+id/username_group" />
+
+        <View
+            android:id="@+id/divider5"
+            style="@style/Divider"
+            android:layout_below="@+id/password_group" />
+
+
+        <View
+            android:id="@+id/divider6"
+            style="@style/Divider"
+            android:layout_below="@+id/tls_client_key_group" />
+
+
+        <View
+            android:id="@+id/divider7"
+            style="@style/Divider"
+            android:layout_below="@+id/timeout_group" />
+
+
+        <View
+            android:id="@+id/divider8"
+            style="@style/Divider"
+            android:layout_below="@+id/topic_group" />
+
+        <View
+            android:id="@+id/divider9"
+            style="@style/Divider"
+            android:layout_below="@+id/lwt_message_group" />
+
+        <View
+            android:id="@+id/divider10"
+            style="@style/Divider"
+            android:layout_below="@+id/lwt_qos_group" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+
+
+    </RelativeLayout>
+</ScrollView>
+

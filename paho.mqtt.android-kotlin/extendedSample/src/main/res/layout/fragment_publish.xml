@@ -1,0 +1,80 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/publish_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/retain_switch"
+        android:layout_centerHorizontal="true"
+        android:text="@string/publish" />
+
+    <LinearLayout
+        android:id="@+id/lwt_qos_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/divider10"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/qos_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/lwt_qos_label"
+            style="@style/spinnerTextFieldLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_connection_lwt_qos_label" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider10"
+        style="@style/Divider"
+        android:layout_below="@+id/lwt_message_group" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/retain_switch"
+        style="@style/Switch"
+        android:layout_below="@+id/lwt_qos_group"
+        android:checked="false"
+        android:text="@string/add_connection_lwt_retain_label" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/topic_group"
+        android:layout_width="match_parent"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/topic_label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/topic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/lwt_message_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_below="@+id/topic_group"
+        android:hint="@string/add_connection_lwt_message_label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+</RelativeLayout>
