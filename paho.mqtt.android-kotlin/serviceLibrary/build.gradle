@@ -1,0 +1,73 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'maven-publish'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+
+        // Android Studio 4.1 doesn't generate versionName in libraries any more
+        // https://developer.android.com/studio/releases/gradle-plugin#version_properties_removed_from_buildconfig_class_in_library_projects
+        buildConfigField "String", 'VERSION_NAME', "\"" + getTag() + "\""
+
+        testApplicationId "info.mgtt.android.service.test"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments useTestStorageService: 'true'
+
+        packagingOptions {
+            pickFirst 'META-INF/serviceLibrary_debug.kotlin_module'
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions { arguments = ["room.schemaLocation": "$projectDir/schemas".toString()] }
+        }
+
+        buildTypes {
+            release {
+                minifyEnabled false
+                consumerProguardFile('proguard-sdk.pro')
+            }
+        }
+    }
+    namespace 'info.mqtt.android.service'
+    testNamespace 'info.mqtt.android.service.test'
+}
+
+dependencies {
+    api "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation "androidx.core:core-ktx:1.10.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "com.github.AppDevNext.Logcat:LogcatCoreLib:$logcatVersion"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
+    androidTestUtil "androidx.test.services:test-services:1.4.2"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    androidTestImplementation "androidx.test:rules:1.5.0"
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+project.afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                artifact androidSourcesJar
+            }
+        }
+    }
+}

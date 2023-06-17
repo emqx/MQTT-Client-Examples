@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "info.mqtt.java.example"
+        minSdkVersion 21
+        targetSdkVersion 33
+//        versionCode getGitCommitCount()
+//        versionName getTag()
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments useTestStorageService: 'true'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    namespace 'info.mqtt.java.example'
+
+}
+
+dependencies {
+    implementation project(':serviceLibrary')
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation "com.github.AppDevNext.Logcat:LogcatCoreLib:$logcatVersion"
+
+    implementation "androidx.core:core-ktx:1.10.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'com.github.AppDevNext:Moka:1.6'
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
+    androidTestUtil "androidx.test.services:test-services:1.4.2"
+}
