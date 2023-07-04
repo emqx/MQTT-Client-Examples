@@ -20,6 +20,24 @@ mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttOneWayTlsSample"
 mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttTwoWayTlsSample"
 ```
 
+## Run file transfer sample
+
+```bash
+mvn exec:java -Dexec.mainClass="io.emqx.mqtt.MqttFileTransferSample"  -Dexec.args="-b tcp://broker.emqx.io:1883 -f /tmp/file.txt -u emqx -z public"
+```
+
+Args:
+
+```
+Args:
+-h Help information
+-b MQTT broker url [default: tcp://broker.emqx.io:1883]
+-f The absolute path of the file to be uploaded [Required]
+-u Username [default: emqx]
+-z Password [default: public]
+```
+
+
 ## Run MqttExample
 
 ```bash

@@ -1,5 +1,6 @@
 package io.emqx.mqtt;
 
+import com.sun.deploy.util.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -20,11 +21,16 @@ public class MqttFileTransferSample {
      */
     private final static int SEGMENT_SIZE = 1024 * 10;
     private final static String CLIENT_ID_PREFIX = "emqx-file-transfer-";
+    private final static int QOS = 1;
     private MqttClient client;
-    private int QOS = 1;
-    private String username = "emqx";
-    private String password = "public123";
+    private String username;
+    private String password;
 
+
+    public MqttFileTransferSample(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
     public void initClient(String brokerUrl, String clientId) {
         try {
@@ -177,12 +183,69 @@ public class MqttFileTransferSample {
     }
 
     public static void main(String[] args) {
-
+        String userName = "emqx";
+        String password = "public";
         String broker = "tcp://broker.emqx.io:1883";
-        //  The absolute path of the file to be uploaded
-        String filePath = "/tmp/file.png";
+        String filePath = "";
 
-        new MqttFileTransferSample().transferFile(filePath, broker);
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].length() == 2 && args[i].startsWith("-")) {
+                char arg = args[i].charAt(1);
+                if (arg == 'h') {
+                    help();
+                    return;
+                }
+
+                if (i == args.length - 1 || args[i + 1].charAt(0) == '-') {
+                    System.out.println("Missing value for argument: " + args[i]);
+                    help();
+                    return;
+                }
+                switch (arg) {
+                    case 'b':
+                        broker = args[++i];
+                        break;
+                    case 'f':
+                        filePath = args[++i];
+                        break;
+                    case 'u':
+                        userName = args[++i];
+                        break;
+                    case 'z':
+                        password = args[++i];
+                        break;
+                    default:
+                        System.out.println("Unknown argument: " + args[i]);
+                        help();
+                        return;
+                }
+            } else {
+                System.out.println("Unknown argument: " + args[i]);
+                help();
+                return;
+            }
+        }
+
+        if(filePath == null || filePath.length() <=0){
+            System.out.println("The argument f is required ");
+            help();
+            return;
+        }
+
+        System.out.println("Args => broker:"+broker+" filePath:"+filePath+" userName="+userName+" password:"+password);
+        new MqttFileTransferSample(userName,password).transferFile(filePath, broker);
+    }
+
+
+    private static void help() {
+        System.out.println(
+                "Args:\n" +
+                        "-h Help information\n" +
+                        "-b MQTT broker url [default: tcp://broker.emqx.io:1883]\n" +
+                        "-f The absolute path of the file to be uploaded [Required]\n" +
+                        "-u Username [default: emqx]\n" +
+                        "-z Password [default: public]\n"
+        );
     }
 
 }
