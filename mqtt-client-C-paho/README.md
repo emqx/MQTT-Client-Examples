@@ -1,3 +1,9 @@
+This directory contains two example programs demonstrating how to use an MQTT client from a C program:
+
+* main.c - a simple command-line based publisher/subscriber written in C. The remainder of this document describes the details of this application.
+* emqx_file_transfer.c - an example demonstrating how to use EMQX File Transfer Extension (https://www.emqx.io/docs/en/v5/file-transfer/introduction.html) from a C program. This example also works as a simple command line tool for using EMQX File Transfer Extension. Please see comments in the source code of this program for details. The compilation instruction in this document also works for this program.
+
+
 # Connect to the Deployment with C
 
 This article mainly introduces how to use `Eclipse Paho C` in the C project, and implement the connection, subscription, messaging, unsubscribing and other functions between the client and MQTT broker.
