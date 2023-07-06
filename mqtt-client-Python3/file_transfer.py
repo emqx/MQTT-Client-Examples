@@ -75,7 +75,11 @@ def process_transfer(client, userdata, stage):
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0 and client.is_connected():
         logging.info("Connected to the MQTT Broker")
-        process_transfer(client, userdata, "init")
+        # If the initial connection is successful, start the file transfer.
+        # Otherwise, let the client retransmit outstanding messages and complete
+        # the transfer.
+        if not userdata.stages:
+            process_transfer(client, userdata, "init")
     else:
         logging.error(f'Failed to connect, return code {rc}')
 
