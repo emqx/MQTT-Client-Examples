@@ -135,6 +135,16 @@ int send_file(MQTTClient client,
         }
         offset += read_bytes;
     }
+    // Check if we reached the end of the file
+    if (feof(fp)) {
+        if (DEBUG) {
+            printf("Reached end of file\n");
+        }
+    } else {
+        printf("Failed to read file\n");
+        return -1;
+    }
+    fclose(fp);
     // Send final message to the topic $file/{file_id}/fin/{file_size} with an empty payload
     rc = snprintf(topic, buf_size, "$file/%s/fin/%ld", file_id, file_size);
     if (rc < 0 || rc >= buf_size) {
@@ -154,7 +164,6 @@ int send_file(MQTTClient client,
         printf("Failed to publish final message, return code %d\n", rc);
         return -1;
     }
-    fclose(fp);
     return 0;
 }
 
