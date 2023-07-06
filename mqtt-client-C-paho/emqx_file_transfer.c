@@ -23,8 +23,9 @@
 #include <MQTTClient.h>
 
 #define CLIENTID    "c-client"
-#define TIMEOUT     10000L
+#define TIMEOUT     100000L
 #define DEBUG       0
+
 
 int send_file(MQTTClient client,
               char *file_path,
@@ -46,19 +47,40 @@ int send_file(MQTTClient client,
     fseek(fp, 0L, SEEK_SET);
     // Create payload for initial message 
     char payload[buf_size];
-    rc = snprintf(payload,
+    char expire_at_str[128];
+    char segments_ttl_str[128];
+    if (expire_time_s_since_epoch == -1) {
+        expire_at_str[0] = '\0';
+    } else {
+        // No need to check return value since we know the buffer is large enough
+        snprintf(expire_at_str,
+                128,
+                "  \"expire_at\": %ld,\n",
+                expire_time_s_since_epoch);
+    }
+    if (segments_ttl_seconds == -1) {
+        segments_ttl_str[0] = '\0';
+    } else {
+        // No need to check return value since we know the buffer is large enough
+        snprintf(segments_ttl_str,
+                128,
+                "  \"segments_ttl\": %ld,\n",
+                segments_ttl_seconds);
+    }
+    rc = snprintf(
+            payload,
             buf_size,
             "{\n"
             "  \"name\": \"%s\",\n"
             "  \"size\": %ld,\n"
-            "  \"expire_at\": %ld,\n"
-            "  \"segments_ttl\": %ld,\n"
+            "%s"
+            "%s"
             "  \"user_data\": {}\n"
             "}",
             file_name,
             file_size,
-            expire_time_s_since_epoch,
-            segments_ttl_seconds);
+            expire_at_str,
+            segments_ttl_str);
     if (rc < 0 || rc >= buf_size) {
         printf("Failed to create payload for initial message\n");
         return -1;
@@ -127,6 +149,11 @@ int send_file(MQTTClient client,
         printf("Failed to publish final message, return code %d\n", rc);
         return -1;
     }
+    rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
+    if (rc != MQTTCLIENT_SUCCESS) {
+        printf("Failed to publish final message, return code %d\n", rc);
+        return -1;
+    }
     fclose(fp);
     return 0;
 }
@@ -156,8 +183,8 @@ void read_command_line_arguments(
     *file_name = "myfile.txt";
     *host = "localhost";
     *port = 1883;
-    *segments_ttl_seconds = 3600;
-    *expire_after_seconds = 3600;
+    *segments_ttl_seconds = -1;
+    *expire_after_seconds = -1;
     *client_id = CLIENTID;
     *username = NULL;
     *password = NULL;
@@ -199,7 +226,7 @@ void read_command_line_arguments(
             printf("Argument %s %s\n", argv[i], argv[i + 1]);
         }
     }
-    // Check if --file, --file-id and --client-id are passed in
+    // Check if --file and --file-id are passed in
     if (*file_path == NULL || *file_id == NULL) {
         printf("Missing required arguments\n");
         print_usage();
@@ -272,8 +299,14 @@ int main(int argc, char *argv[]) {
             printf("Connected to MQTT Broker!\n");
         }
     }
+    // Calculate expire time
+    unsigned long expire_time_s_since_epoch;
+    if (expire_after_seconds == -1) {
+        expire_time_s_since_epoch = -1;
+    } else {
+        expire_time_s_since_epoch = time(NULL) + expire_after_seconds;
+    }
     // Send file
-    unsigned long expire_time_s_since_epoch = time(NULL) + expire_after_seconds;
     int result = send_file(client,
                            file_path,
                            file_id,
