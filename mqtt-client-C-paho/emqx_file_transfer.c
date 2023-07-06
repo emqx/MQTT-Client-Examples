@@ -14,6 +14,21 @@
  * Change the DEBUG macro to 1 to see debug messages.
  */
 
+/*
+ * TODO: In order to know that the broker accepted the file and the individual
+ * messages one has to check the PUBACK reason code. This is not implemented
+ * in this example so even if everything seems to work we don't know that the
+ * file has been stored by the broker (without checking with e.g., the HTTP
+ * API). The PUBACK reason code is a MQTT v5 feature so in order to fix this we
+ * would first have to make sure that the client connects with the MQTT v5
+ * protocol and then check the PUBACK reason code fore each message. It seems
+ * like this could be done by setting a handler with MQTTClient_setPublished()
+ * https://www.eclipse.org/paho/files/mqttdoc/MQTTClient/html/_m_q_t_t_client_8h.html#a9f13911351a3de6b1ebdabd4cb4116ba
+ * . Unfortunately I had some problem with connecting with MQTT v5 so I have
+ * not been able to test this yet. See also:
+ * https://github.com/emqx/MQTT-Client-Examples/pull/112#discussion_r1253421492
+ */
+
 
 #include <stdlib.h>
 #include <string.h>
