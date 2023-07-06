@@ -1,9 +1,14 @@
 # Python MQTT client examples
-In this example we provide example code for TCP, Websocket, TLS, and Websockets protocols to connect to the MQTT Broker.
+
+In this repository we provide examples for:
+* Establishing TCP, TLS, and Websocket connection to the MQTT Broker.
+* Publish and Subscribe to MQTT topics.
+* Transferring files over MQTT connection to the EMQX MQTT broker using the [EMQX File Transfer](https://www.emqx.io/docs/en/v5/file-transfer/introduction.html) feature.
+
 For more documentation on the use of the python paho-mqtt client, see the [Python Client - documentation](https://www.eclipse.org/paho/index.php?page=clients/python/docs/index.php)
 
 ## Prerequisites
-* It supports Python 3.4+
+* Python 3.4+
 
 
 ## Installation
