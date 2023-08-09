@@ -57,7 +57,7 @@ def connect_mqtt():
     client = mqtt_client.Client(CLIENT_ID, transport='websockets')
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect
-    client.connect(BROKER, PORT, keepalive=3)
+    client.connect(BROKER, PORT, keepalive=120)
     client.on_disconnect = on_disconnect
     return client
 

@@ -58,7 +58,7 @@ def connect_mqtt():
     client.tls_set(ca_certs='./broker.emqx.io-ca.crt')
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect
-    client.connect(BROKER, PORT, keepalive=3)
+    client.connect(BROKER, PORT, keepalive=120)
     client.on_disconnect = on_disconnect
     return client
 
