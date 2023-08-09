@@ -74,7 +74,7 @@ def connect_mqtt():
     client.on_connect = on_connect
     client.on_message = on_message
     # Broker address and port defined on broker side, keep-alive of choice
-    client.connect(BROKER, port=PORT, keepalive=3, clean_start="MQTT_CLEAN_START_FIRST_ONLY")
+    client.connect(BROKER, port=PORT, keepalive=120, clean_start="MQTT_CLEAN_START_FIRST_ONLY")
     client.on_disconnect = on_disconnect
     return client
 

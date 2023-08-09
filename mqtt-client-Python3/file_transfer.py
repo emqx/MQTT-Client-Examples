@@ -137,7 +137,7 @@ def run():
     client.enable_logger(logging.getLogger())
     client.on_connect = on_connect
     client.on_publish = on_publish
-    client.connect(args.host, args.port, keepalive=60)
+    client.connect(args.host, args.port, keepalive=120)
 
     client.loop_forever()
 
