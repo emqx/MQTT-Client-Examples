@@ -1,5 +1,6 @@
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 
 Future<MqttClient> connect() async {
@@ -22,6 +23,20 @@ Future<MqttClient> connect() async {
       .startClean()
       .withWillQos(MqttQos.atLeastOnce);
   client.connectionMessage = connMess;
+
+  // If you want to use TLS connection, use the following code
+
+  // Security context
+  // List<int> caBytes = await loadBytes('assets/certs/server-ca.crt');
+  // List<int> clientCertBytes = await loadBytes('assets/certs/client.crt');
+  // List<int> clientKeyBytes = await loadBytes('assets/certs/client.key');
+  // SecurityContext context = new SecurityContext()
+  //   ..setTrustedCertificatesBytes(caBytes)
+  //   ..usePrivateKeyBytes(clientKeyBytes)
+  //   ..useCertificateChainBytes(clientCertBytes);
+  // client.secure = true;
+  // client.securityContext = context;
+
   try {
     print('Connecting');
     await client.connect();
@@ -55,6 +70,12 @@ Future<MqttClient> connect() async {
   }
 
   return client;
+}
+
+Future<List<int>> loadBytes(String assetPath) async {
+  ByteData data = await rootBundle.load(assetPath);
+  List<int> bytes = data.buffer.asUint8List();
+  return bytes;
 }
 
 void onConnected() {
