@@ -92,8 +92,9 @@ base_options(Transport, Host, Port, ClientId) ->
             ],
     case Transport == tls orelse Transport == wss of
         true ->
-            [{ssl, true},
-             {ssl_opts, [
+            WSTransportOptions = 
+                   [{ssl, true},
+                    {ssl_opts, [
                          {cacertfile, "certs/cacert.pem"},
                          {certfile, "certs/client-cert.pem"},
                          {keyfile, "certs/client-key.pem"},
@@ -102,7 +103,20 @@ base_options(Transport, Host, Port, ClientId) ->
                          %% or enable verify the server's cert
                          %{verify, verify_peer}
                         ]
-             }] ++ Basic;
+                    }]
+            ++ 
+            case Transport == wss of
+                true ->
+                    [
+                        { ws_transport_options, [
+                            {transport, tls},
+                            {protocols,[http]}
+                        ]}
+                    ];
+                _ ->
+                    []
+            end,
+            WSTransportOptions ++ Basic;
         _ ->
             Basic
     end.
