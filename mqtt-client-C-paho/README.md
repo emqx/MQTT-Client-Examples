@@ -138,6 +138,17 @@ for (int i = 0; i < 100; i += 1) {
 }
 ```
 
+### Use MQTT over TLS
+```c
+MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
+/* Set the value of 'verify' to 0, which means that the domain should not be checked. Otherwise, if the domain does not match, an error will occur. */
+ssl_opts.verify = 0;
+ssl_opts.keyStore = CLIENTCERT;
+ssl_opts.trustStore = CACERT;
+ssl_opts.privateKey = PRIVATEKEY;
+conn_opts.ssl = &ssl_opts;
+```
+
 ### The full code
 
 ```c
