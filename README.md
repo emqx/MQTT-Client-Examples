@@ -16,6 +16,8 @@ The broker supports the following protocols:
 - SSL/TLS Port: 8883
 - WebSocket Secure Port: 8084
 
+Regarding the CA certificate download link for the Free Public MQTT Broker, you can visit: https://assets.emqx.com/data/broker.emqx.io-ca.crt
+
 ## Directory Structure
 
 Each directory contains examples in the respective programming language. Examples are organized into folders, with each folder containing an example program. Please see the README file for each example program to learn how to run the example.
