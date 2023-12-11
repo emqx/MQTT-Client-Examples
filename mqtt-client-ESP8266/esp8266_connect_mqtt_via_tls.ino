@@ -23,7 +23,7 @@ PubSubClient client(espClient);
   and update the 'fingerprint' variable below.
 */
 // 1. fingerprint of public emqx broker. Host: broker.emqx.io
-const char* fingerprint = "B6 C6 FF 82 C6 59 09 BB D6 39 80 7F E7 BC 10 C9 19 C8 21 8E";
+const char* fingerprint = "9C:AB:8D:07:10:4D:26:B1:C6:07:26:1C:C4:F2:6F:F1:E8:A6:0E:63";
 // 2. fingerprint of EMQX Cloud Serverless. Host: *.emqxsl.com
 // const char* fingerprint = "42:AE:D8:A3:42:F1:C4:1F:CD:64:9C:D7:4B:A1:EE:5B:5E:D7:E2:B5";
 // 3. fingerprint of EMQX Cloud Serverless. Host: *.emqxsl.cn
