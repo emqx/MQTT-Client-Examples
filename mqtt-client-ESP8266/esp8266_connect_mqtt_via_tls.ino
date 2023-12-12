@@ -21,6 +21,9 @@ PubSubClient client(espClient);
   If you are not using EMQX Cloud Serverless or public EMQX broker,
   you need to calculate the sha1 fingerprint of your server certificate
   and update the 'fingerprint' variable below.
+
+  You can use the following command to calculate the fingerprint:
+  openssl s_client -connect broker.emqx.io:8883 < /dev/null 2>/dev/null | openssl x509 -fingerprint  -sha1 -noout -in /dev/stdin
 */
 // 1. fingerprint of public emqx broker. Host: broker.emqx.io
 const char* fingerprint = "9C:AB:8D:07:10:4D:26:B1:C6:07:26:1C:C4:F2:6F:F1:E8:A6:0E:63";
