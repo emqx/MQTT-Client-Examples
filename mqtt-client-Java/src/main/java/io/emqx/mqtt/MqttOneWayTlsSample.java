@@ -2,14 +2,7 @@ package io.emqx.mqtt;
 
 import org.eclipse.paho.client.mqttv3.*;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.FileInputStream;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
@@ -24,9 +17,9 @@ public class MqttOneWayTlsSample {
     private static final String TOPIC = "java-mqtt/tls";
     private static final int QoS = 1;
     private static final String PAYLOAD = "Enjoy the sample";
-    private static final String CA_CERT_PATH = MqttOneWayTlsSample.class.getResource("").getPath()+"./broker.emqx.io-ca.crt";
+    private static final String CA_CERT_PATH = MqttOneWayTlsSample.class.getResource("").getPath() + "./broker.emqx.io-ca.crt";
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         MqttClient client = null;
         try {
             String server = "ssl://" + BROKER + ":" + PORT;
@@ -62,8 +55,7 @@ public class MqttOneWayTlsSample {
             options.setPassword(PASSWORD.toCharArray());
             options.setConnectionTimeout(CONNECT_TIMEOUT);
             options.setCleanSession(CLEAN_SESSION);
-            options.setSocketFactory(getSocketFactory(CA_CERT_PATH));
-
+            options.setSocketFactory(SSLUtils.getSingleSocketFactory(CA_CERT_PATH));
             System.out.println("Connecting to broker: " + server);
             client.connect(options);
 
@@ -76,7 +68,7 @@ public class MqttOneWayTlsSample {
             client.subscribe(TOPIC, QoS);
             System.out.println("Subscribed to topic: " + TOPIC);
 
-            MqttMessage msg = new MqttMessage(PAYLOAD.getBytes("UTF-8"));
+            MqttMessage msg = new MqttMessage(PAYLOAD.getBytes(StandardCharsets.UTF_8));
             msg.setQos(QoS);
             client.publish(TOPIC, msg);
 
@@ -93,25 +85,5 @@ public class MqttOneWayTlsSample {
                 }
             }
         }
-    }
-
-    public static SSLSocketFactory getSocketFactory(String caCertPath) throws Exception {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-
-        // load CA certificate into keystore to authenticate server
-        Certificate caCert = certFactory.generateCertificate(new FileInputStream(caCertPath));
-        X509Certificate x509CaCert = (X509Certificate) caCert;
-
-        KeyStore caKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        caKeyStore.load(null, null);
-        caKeyStore.setCertificateEntry("cacert", x509CaCert);
-
-        TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmFactory.init(caKeyStore);
-
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        sslContext.init(null, tmFactory.getTrustManagers(), null);
-
-        return sslContext.getSocketFactory();
     }
 }
