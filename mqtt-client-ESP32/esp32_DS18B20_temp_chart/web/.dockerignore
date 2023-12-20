@@ -1,0 +1,15 @@
+# flyctl launch added from .idea/.gitignore
+# Default ignored files
+.idea/
+
+# flyctl launch added from venv/.gitignore
+# created by virtualenv automatically
+venv/**/*
+
+fly.toml
+
+./data/database.db
+
+./__pycache__/
+
+
