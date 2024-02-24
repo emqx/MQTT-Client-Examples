@@ -79,7 +79,7 @@ func main() {
 	}
 	log.Printf("Meta info: %s", meta)
 
-	// Public metadata.
+	// Publish metadata.
 	if token := c.Publish(fmt.Sprintf("$file/%s/init", fileId), byte(qos), false, meta); token.Error() != nil {
 		log.Fatal(token.Error())
 	}
