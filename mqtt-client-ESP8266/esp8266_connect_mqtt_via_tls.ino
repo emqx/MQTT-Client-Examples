@@ -135,7 +135,7 @@ void connectToMQTT() {
             Serial.println("Connected to MQTT broker");
             mqtt_client.subscribe(mqtt_topic);
             // Publish message upon successful connection
-            mqtt_client.publish(topic, "Hi EMQX I'm ESP8266 ^^");
+            mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 ^^");
         } else {
             char err_buf[128];
             espClient.getLastSSLError(err_buf, sizeof(err_buf));
