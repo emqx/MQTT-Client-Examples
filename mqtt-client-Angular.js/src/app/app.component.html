@@ -6,44 +6,46 @@
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Host</mat-label>
-            <input matInput [value]="connection.hostname" />
+            <input matInput [value]="connection.hostname"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Port</mat-label>
-            <input matInput type="number" [value]="connection.port" placeholder="8083/8084" />
+            <input matInput type="number" [value]="connection.port" placeholder="8083/8084"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Mountpoint</mat-label>
-            <input matInput [value]="connection.path" placeholder="/mqtt" />
+            <input matInput [value]="connection.path" placeholder="/mqtt"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Client ID</mat-label>
-            <input matInput [value]="connection.clientId" />
+            <input matInput [value]="connection.clientId"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Username</mat-label>
-            <input matInput [value]="connection.username" />
+            <input matInput [value]="connection.username"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Password</mat-label>
-            <input matInput [value]="connection.password" />
+            <input matInput [value]="connection.password"/>
           </mat-form-field>
         </mat-grid-tile>
       </mat-grid-list>
     </form>
     <mat-grid-list cols="8" rowHeight="4:1">
       <mat-grid-tile>
-        <button mat-raised-button color="primary" (click)="createConnection()">{{ isConnection ? 'Connected' : 'Connect' }}</button>
+        <button mat-raised-button color="primary"
+                (click)="createConnection()">{{ isConnection ? 'Connected' : 'Connect' }}
+        </button>
       </mat-grid-tile>
       <mat-grid-tile>
         <button mat-raised-button color="warn" (click)="destroyConnection()" *ngIf="isConnection">Disconnect</button>
@@ -58,15 +60,15 @@
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Topic</mat-label>
-            <input matInput [value]="subscription.topic" />
+            <input matInput [(ngModel)]="subscription.topic" [ngModelOptions]="{standalone: true}"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>QoS</mat-label>
-            <mat-select [value]="subscription.qos">
+            <mat-select [(ngModel)]="subscription.qos" [ngModelOptions]="{standalone: true}">
               <mat-option *ngFor="let item of qosList" [value]="item.value">
-                {{item.label}}
+                {{ item.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -75,7 +77,9 @@
     </form>
     <mat-grid-list cols="8" rowHeight="4:1">
       <mat-grid-tile>
-        <button mat-raised-button color="primary" (click)="doSubscribe()">{{ subscribeSuccess ? 'Subscribed' : 'Subscribe' }}</button>
+        <button mat-raised-button color="primary"
+                (click)="doSubscribe()">{{ subscribeSuccess ? 'Subscribed' : 'Subscribe' }}
+        </button>
       </mat-grid-tile>
       <mat-grid-tile>
         <button mat-raised-button color="warn" (click)="doUnSubscribe()" *ngIf="subscribeSuccess">Unsubscribe</button>
@@ -90,21 +94,21 @@
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Topic</mat-label>
-            <input matInput [value]="publish.topic" />
+            <input matInput [(ngModel)]="publish.topic" [ngModelOptions]="{standalone: true}"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>Payload</mat-label>
-            <input matInput [value]="publish.payload" />
+            <input matInput [(ngModel)]="publish.payload" [ngModelOptions]="{standalone: true}"/>
           </mat-form-field>
         </mat-grid-tile>
         <mat-grid-tile>
           <mat-form-field appearance="fill">
             <mat-label>QoS</mat-label>
-            <mat-select [value]="subscription.qos">
+            <mat-select [(ngModel)]="subscription.qos" [ngModelOptions]="{standalone: true}">
               <mat-option *ngFor="let item of qosList" [value]="item.value">
-                {{item.label}}
+                {{ item.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>

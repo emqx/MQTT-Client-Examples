@@ -3,13 +3,14 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
 import { IMqttServiceOptions, MqttModule } from 'ngx-mqtt';
+import {MatCardModule} from "@angular/material/card";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatInputModule} from "@angular/material/input";
+import {MatButtonModule} from "@angular/material/button";
+import {MatSelectModule} from "@angular/material/select";
+import {FormsModule} from "@angular/forms";
 
 export const connection: IMqttServiceOptions = {
   hostname: 'broker.emqx.io',
@@ -33,6 +34,7 @@ export const connection: IMqttServiceOptions = {
     BrowserModule,
     BrowserAnimationsModule,
     MatCardModule,
+    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatGridListModule,
