@@ -47,7 +47,7 @@ void connectToMQTTBroker() {
             Serial.println("Connected to MQTT broker");
             mqtt_client.subscribe(mqtt_topic);
             // Publish message upon successful connection
-            mqtt_client.publish(topic, "Hi EMQX I'm ESP8266 ^^");
+            mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 ^^");
         } else {
             Serial.print("Failed to connect to MQTT broker, rc=");
             Serial.print(mqtt_client.state());
