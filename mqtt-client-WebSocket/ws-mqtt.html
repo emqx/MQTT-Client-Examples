@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MQTT over WebSocket</title>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <!-- the latest version of mqtt.js is recommended -->
+    <!-- <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script> -->
+    <!-- however, due to the issue https://github.com/mqttjs/MQTT.js/pull/1871#issuecomment-2127647457, we use v5.6.1 now -->
+    <script src="https://unpkg.com/mqtt@5.6.1/dist/mqtt.min.js"></script>
   </head>
   <body>
     <h1>Use WebSocket client to connect to MQTT server</h1>
@@ -50,10 +53,10 @@
     const connectUrl = 'wss://broker.emqx.io:8084/mqtt'
 
     const options = {
-      keepalive: 30,
+      keepalive: 60,
       clientId: clientId,
       clean: true,
-      connectTimeout: 5000,
+      connectTimeout: 30 * 1000,
       /**
        * By default, EMQX allows clients to connect without authentication.
        * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
