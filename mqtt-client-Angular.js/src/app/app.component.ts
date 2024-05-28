@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {
   IMqttMessage,
   IMqttServiceOptions,
   MqttService,
   IPublishOptions,
 } from 'ngx-mqtt';
-import { IClientSubscribeOptions } from 'mqtt-browser';
-import { Subscription } from 'rxjs';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {IClientSubscribeOptions} from 'mqtt-browser';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,9 +15,10 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  constructor(private _mqttService: MqttService) {
+  constructor(private _mqttService: MqttService, private _snackBar: MatSnackBar) {
     this.client = this._mqttService;
   }
+
   private curSubscription: Subscription | undefined;
   connection = {
     hostname: 'broker.emqx.io',
@@ -30,21 +32,21 @@ export class AppComponent {
     username: 'emqx_test',
     password: 'emqx_test',
     protocol: 'ws',
-    }
+  }
   subscription = {
-    topic: 'topic/mqttx',
+    topic: 'topictest/browser',
     qos: 0,
   };
   publish = {
-    topic: 'topic/browser',
+    topic: 'topictest/browser',
     qos: 0,
     payload: '{ "msg": "Hello, I am browser." }',
   };
   receiveNews = '';
   qosList = [
-    { label: 0, value: 0 },
-    { label: 1, value: 1 },
-    { label: 2, value: 2 },
+    {label: 0, value: 0},
+    {label: 1, value: 1},
+    {label: 2, value: 2},
   ];
   client: MqttService | undefined;
   isConnection = false;
@@ -73,30 +75,40 @@ export class AppComponent {
       console.log('Connection failed', error);
     });
     this.client?.onMessage.subscribe((packet: any) => {
-      this.receiveNews = this.receiveNews.concat(packet.payload.toString())
+      this.receiveNews = this.receiveNews.concat([packet.payload.toString(), '\n'].join())
       console.log(`Received message ${packet.payload.toString()} from topic ${packet.topic}`)
     })
   }
 
   // 订阅主题
   doSubscribe() {
-    const { topic, qos } = this.subscription
-    this.curSubscription = this.client?.observe(topic, { qos } as IClientSubscribeOptions).subscribe((message: IMqttMessage) => {
-      this.subscribeSuccess = true
-      console.log('Subscribe to topics res', message.payload.toString())
-    })
+    const {topic, qos} = this.subscription
+    if (!this.client) {
+      this._snackBar.open('There is no mqtt client available...', 'close');
+      return;
+    }
+    this.curSubscription = this.client.observe(topic, {qos} as IClientSubscribeOptions)
+      .subscribe((message: IMqttMessage) => {
+        this.subscribeSuccess = true
+        const msg = ['Received message: ', message.payload.toString()].join(' ');
+        this._snackBar.open(msg, 'close');
+        console.log(message);
+      });
   }
+
   // 取消订阅
   doUnSubscribe() {
     this.curSubscription?.unsubscribe()
     this.subscribeSuccess = false
   }
+
   // 发送消息
   doPublish() {
-    const { topic, qos, payload } = this.publish
+    const {topic, qos, payload} = this.publish
     console.log(this.publish)
-    this.client?.unsafePublish(topic, payload, { qos } as IPublishOptions)
+    this.client?.unsafePublish(topic, payload, {qos} as IPublishOptions)
   }
+
   // 断开连接
   destroyConnection() {
     try {
