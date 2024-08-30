@@ -24,10 +24,10 @@ export class AppComponent {
     hostname: 'broker.emqx.io',
     port: 8083,
     path: '/mqtt',
-    clean: true, // Retain session
-    connectTimeout: 4000, // Timeout
-    reconnectPeriod: 4000, // Reconnection interval
-    // Authentication information
+    clean: true, // 保留会话
+    connectTimeout: 4000, // 超时时间
+    reconnectPeriod: 4000, // 重连时间间隔
+    // 认证信息
     clientId: 'mqttx_597046f4',
     username: 'emqx_test',
     password: 'emqx_test',
@@ -52,15 +52,15 @@ export class AppComponent {
   isConnection = false;
   subscribeSuccess = false;
 
-  // Create connection
+  // 创建连接
   createConnection() {
-    // Connection string, specify the connection method through the protocol
-    // ws unencrypted WebSocket connection
-    // wss encrypted WebSocket connection
-    // mqtt unencrypted TCP connection
-    // mqtts encrypted TCP connection
-    // wxs WeChat Mini Program connection
-    // alis Alipay Mini Program connection
+    // 连接字符串, 通过协议指定使用的连接方式
+    // ws 未加密 WebSocket 连接
+    // wss 加密 WebSocket 连接
+    // mqtt 未加密 TCP 连接
+    // mqtts 加密 TCP 连接
+    // wxs 微信小程序连接
+    // alis 支付宝小程序连接
     try {
       this.client?.connect(this.connection as IMqttServiceOptions)
     } catch (error) {
@@ -80,7 +80,7 @@ export class AppComponent {
     })
   }
 
-  // Subscribe to topic
+  // 订阅主题
   doSubscribe() {
     const {topic, qos} = this.subscription
     if (!this.client) {
@@ -96,20 +96,20 @@ export class AppComponent {
       });
   }
 
-  // Unsubscribe
+  // 取消订阅
   doUnSubscribe() {
     this.curSubscription?.unsubscribe()
     this.subscribeSuccess = false
   }
 
-  // Send message
+  // 发送消息
   doPublish() {
     const {topic, qos, payload} = this.publish
     console.log(this.publish)
     this.client?.unsafePublish(topic, payload, {qos} as IPublishOptions)
   }
 
-  // Disconnect
+  // 断开连接
   destroyConnection() {
     try {
       this.client?.disconnect(true)
