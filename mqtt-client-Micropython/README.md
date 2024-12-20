@@ -1,6 +1,11 @@
-# MicroPython MQTT client examples
+# MicroPython MQTT Client Examples
 
-In this example, we provide sample codes for connecting TCP and Websocket protocols to MQTT Broker.
+In this example, we provide sample code for connecting to an MQTT Broker using both TCP and WebSocket protocols. The code is compatible with different versions of MicroPython. Please refer to the appropriate folder for your version:
+
+- **`v1.22_and_earlier`**: Contains examples for MicroPython version 1.22 and earlier.
+- **`v1.23_and_above`**: Contains examples for MicroPython version 1.23 and above.
+
+
 For more documentation on using the MicroPython MQTT client, please refer to [MicroPython Documentation](https://mpython.readthedocs.io/en/master/library/mPython/umqtt.simple.html)
 
 ## Prerequisites
@@ -29,7 +34,11 @@ https://docs.micropython.org/en/latest/develop/gettingstarted.html
 In order to connect to the MQTT server conveniently, we need to install the umqtt.simple library.
 
 ```bash
+# For MicroPython v1.22 and earlier
 micropython -m upip install umqtt.simple
+
+# For MicroPython v1.23 and above
+micropython -m mip install umqtt.simple
 ```
 
 ## Run
