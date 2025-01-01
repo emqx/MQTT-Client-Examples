@@ -17,22 +17,25 @@ import json
 import random
 import ssl
 import time
-import wifi
 
 from umqtt.simple import MQTTClient
+
+import wifi
 
 
 SERVER = "broker.emqx.io"
 PORT = 8883
-CLIENT_ID = 'micropython-client-{id}'.format(id = random.getrandbits(8))
+CLIENT_ID = 'micropython-client-{id}'.format(id=random.getrandbits(8))
 USERNAME = 'emqx'
 PASSWORD = 'public'
 TOPIC = "raspberry/mqtt"
-CA_CERTS_PATH = "./certs/broker.emqx.io-ca.der" # use the public broker CA
+CA_CERTS_PATH = "./certs/broker.emqx.io-ca.der"  # use the public broker CA
+
 
 def on_message(topic, msg):
     print("Received '{payload}' from topic '{topic}'\n".format(
-        payload = msg.decode(), topic = topic.decode()))
+        payload=msg.decode(), topic=topic.decode()))
+
 
 def create_ssl_context():
     # Create an SSL context
@@ -40,17 +43,20 @@ def create_ssl_context():
     ssl_context.load_verify_locations(CA_CERTS_PATH)
     return ssl_context
 
+
 def connect():
     ssl_context = create_ssl_context()
 
-    client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl = ssl_context)
+    client = MQTTClient(CLIENT_ID, SERVER, PORT, USERNAME, PASSWORD, ssl=ssl_context)
     client.connect()
-    print('Connected to MQTT Broker "{server}"'.format(server = SERVER))
+    print('Connected to MQTT Broker "{server}"'.format(server=SERVER))
     return client
+
 
 def subscribe(client):
     client.set_callback(on_message)
     client.subscribe(TOPIC)
+
 
 def loop_publish(client):
     msg_count = 0
@@ -60,16 +66,18 @@ def loop_publish(client):
         }
         msg = json.dumps(msg_dict)
         result = client.publish(TOPIC, msg)
-        print("Send '{msg}' to topic '{topic}'".format(msg = msg, topic = TOPIC))
+        print("Send '{msg}' to topic '{topic}'".format(msg=msg, topic=TOPIC))
         client.wait_msg()
         msg_count += 1
         time.sleep(1)
+
 
 def run():
     wifi.connect()
     client = connect()
     subscribe(client)
     loop_publish(client)
+
 
 if __name__ == "__main__":
     run()
