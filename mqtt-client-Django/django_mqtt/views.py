@@ -2,7 +2,7 @@ import json
 
 from django.http import JsonResponse
 
-from mqtt_test.mqtt import client as mqtt_client
+from django_mqtt.mqtt import client as mqtt_client
 
 
 def publish_message(request):
