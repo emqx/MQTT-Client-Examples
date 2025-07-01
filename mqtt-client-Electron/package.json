@@ -21,6 +21,6 @@
     "mqtt": "^4.3.7"
   },
   "devDependencies": {
-    "electron": "19.0.0"
+    "electron": "28.3.2"
   }
 }
