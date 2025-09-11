@@ -10,7 +10,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "element-plus": "^2.3.3",
+    "element-plus": "^2.11.0",
     "mqtt": "^4.3.7",
     "vue": "^3.2.47"
   },
