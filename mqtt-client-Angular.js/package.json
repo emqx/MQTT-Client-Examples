@@ -13,7 +13,7 @@
     "@angular-builders/custom-webpack": "^14.0.0",
     "@angular/animations": "^14.1.0",
     "@angular/cdk": "^14.1.2",
-    "@angular/common": "^14.1.0",
+    "@angular/common": "^19.2.16",
     "@angular/compiler": "^14.1.0",
     "@angular/core": "^14.1.0",
     "@angular/forms": "^14.1.0",
