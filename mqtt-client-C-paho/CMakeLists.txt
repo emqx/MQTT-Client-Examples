@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-find_package(eclipse-paho-mqtt-c 1.3.9 REQUIRED)
+
 project(mqtt_c C)
 include_directories(/usr/local/include)
 link_directories(/usr/local/lib)

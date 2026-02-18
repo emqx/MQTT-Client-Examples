@@ -1,0 +1,4 @@
+asgiref==3.11.1
+Django==6.0.2
+paho-mqtt==2.1.0
+sqlparse==0.5.5

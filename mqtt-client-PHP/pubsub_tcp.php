@@ -17,7 +17,7 @@ $connectionSettings  = (new ConnectionSettings)
   ->setUsername($username)
   ->setPassword($password)
   ->setKeepAliveInterval(60)
-  // Last Will 设置
+  // Last Will Settings
   ->setLastWillTopic('emqx/test/last-will')
   ->setLastWillMessage('client disconnect')
   ->setLastWillQualityOfService(1);

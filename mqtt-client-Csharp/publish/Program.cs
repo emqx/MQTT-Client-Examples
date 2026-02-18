@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using uPLibrary.Networking.M2Mqtt;
 
 namespace publish
@@ -19,6 +19,7 @@ namespace publish
             }
             return client;
         }
+        
         static void Publish(MqttClient client, string topic)
         {
             int msg_count = 0;
@@ -31,6 +32,7 @@ namespace publish
                 msg_count++;
             }
         }
+        
         static void Main(string[] args)
         {
             string broker = "broker.emqx.io";

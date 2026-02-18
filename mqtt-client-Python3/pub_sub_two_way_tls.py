@@ -58,7 +58,7 @@ def on_message(client, userdata, msg):
 
 
 def connect_mqtt():
-    client = mqtt_client.Client(CLIENT_ID)
+    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, CLIENT_ID)
     client.tls_set(
         ca_certs='./server-ca.crt',
         certfile='./client.crt',

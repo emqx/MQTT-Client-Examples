@@ -68,7 +68,7 @@ def on_message(client, userdata, msg):
 
 def connect_mqtt():
     # Creates an instance of the MQTT client
-    client = mqtt_client.Client(client_id=CLIENT_ID, protocol=MQTTv5)
+    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, client_id=CLIENT_ID, protocol=MQTTv5)
     # Logs in if there is an existing user defined on the broker side
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect

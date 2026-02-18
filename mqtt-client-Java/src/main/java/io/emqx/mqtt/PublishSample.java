@@ -22,27 +22,26 @@ public class PublishSample {
 
         try {
             MqttClient client = new MqttClient(broker, clientid, new MemoryPersistence());
-            // 连接参数
+            // Connection parameters
             MqttConnectOptions options = new MqttConnectOptions();
-            // 设置用户名和密码
+            // Set username and password
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             options.setKeepAliveInterval(60);
             options.setConnectionTimeout(60);
-            // 连接
+            // Connect
             client.connect(options);
-            // 创建消息并设置 QoS
+            // Create message and set QoS
             MqttMessage message = new MqttMessage(content.getBytes());
             message.setQos(qos);
-            // 发布消息
+            // Publish message
             client.publish(topic, message);
             System.out.println("Message published");
             System.out.println("topic: " + topic);
             System.out.println("message content: " + content);
-            // 断开连接
+            // Disconnect
             client.disconnect();
-            // 关闭客户端
-            client.close();
+            // Close client
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }

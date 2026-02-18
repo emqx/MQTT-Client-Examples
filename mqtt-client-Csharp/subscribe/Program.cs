@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
@@ -20,16 +20,20 @@ namespace subscribe
             }
             return client;
         }
+
         static void Subscribe(MqttClient client, string topic)
         {
-            client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-            client.Subscribe(new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            client.MqttMsgPublishReceived += (sender, e) =>
+            {
+                Console.WriteLine($"Received `{System.Text.Encoding.UTF8.GetString(e.Message)}` from `{e.Topic}` topic");
+            };
+
+            client.Subscribe(new string[] { topic }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+
+            Console.WriteLine($"Subscribed to topic: {topic}");
+            Console.ReadLine(); // Keep the program running
         }
-        static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
-        {
-            string payload = System.Text.Encoding.Default.GetString(e.Message);
-            Console.WriteLine("Received `{0}` from `{1}` topic", payload, e.Topic.ToString());
-        }
+
         static void Main(string[] args)
         {
             string broker = "broker.emqx.io";
@@ -38,6 +42,7 @@ namespace subscribe
             string clientId = Guid.NewGuid().ToString();
             string username = "emqx";
             string password = "public";
+
             MqttClient client = ConnectMQTT(broker, port, clientId, username, password);
             Subscribe(client, topic);
         }

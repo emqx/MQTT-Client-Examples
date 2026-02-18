@@ -125,5 +125,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MQTT_SERVER = 'broker.emqx.io'
 MQTT_PORT = 1883
 MQTT_KEEPALIVE = 60
-MQTT_USER = ''
-MQTT_PASSWORD = ''
+MQTT_USER = 'emqx'
+MQTT_PASSWORD = 'public'

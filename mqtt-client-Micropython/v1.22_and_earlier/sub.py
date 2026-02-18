@@ -2,7 +2,7 @@
 import time
 from umqtt.simple import MQTTClient
 
-# 定义 sub 客户端的连接信息
+# Define the connection information for the sub client
 SERVER="broker.emqx.io"
 ClientID = f'raspberry-sub-{time.time_ns()}'
 user = "emqx"
@@ -11,16 +11,16 @@ topic = "raspberry/mqtt"
 msg = b'{"msg":"hello"}'
 
 def sub(topic, msg):
-    # 在回调函数打印主题和消息
-    print('received message %s on topic %s' % (msg, topic))
+    # Print the topic and message in the callback function
+    print('Received message %s on topic %s' % (msg, topic))
 
 def main(server=SERVER):
-    # 创建连接，参数分别为客户端 ID，broker 地址，broker 端口号，认证信息
+    # Create a connection, parameters are client ID, broker address, broker port number, authentication information
     client = MQTTClient(ClientID, server, 1883, user, password)
     client.set_callback(sub)
     client.connect()
     print('Connected to MQTT Broker "%s"' % (server))
-    # 如果与 broker 失去连接后重连，仍然会继续订阅 raspberry/topic 主题
+    # If the connection to the broker is lost and reconnected, it will continue to subscribe to the raspberry/topic topic
     client.subscribe(topic)
     while True:
         if True:

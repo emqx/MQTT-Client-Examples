@@ -29,7 +29,7 @@ def connect():
 
 def reconnect():
     # If unable to connect to the broker, print a message to notify that the connection failed and wait 5 seconds to reconnect
-    print('Failed to connect to MQTT broker, Reconnecting...' % (server))
+    print('Failed to connect to MQTT broker, Reconnecting...')
     time.sleep(5)
     client.reconnect()
 
@@ -42,6 +42,6 @@ except OSError as e:
 
 # Send a message to the topic raspberry/mqtt every second
 while True:
-    print('send message %s on topic %s' % (msg, topic))
+    print('Sending message %s on topic %s' % (msg, topic))
     client.publish(topic, msg, qos=0)
     time.sleep(1)

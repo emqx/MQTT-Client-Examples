@@ -55,7 +55,7 @@ def on_disconnect(client, userdata, rc, properties=None):
 
 def connect_mqtt():
     # client = mqtt_client.Client(CLIENT_ID)
-    client = mqtt_client.Client(CLIENT_ID, protocol=MQTTv5)
+    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, client_id=CLIENT_ID, protocol=MQTTv5)
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect
     client.connect(BROKER, PORT, keepalive=120)

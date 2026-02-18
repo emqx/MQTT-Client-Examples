@@ -1,5 +1,5 @@
 Mix.install([
-  {:emqtt, github: "emqx/emqtt", tag: "1.8.3"},
+  {:emqtt, github: "emqx/emqtt", tag: "1.9.5"},
   {:castore, "~> 1.0.0"}
 ])
 

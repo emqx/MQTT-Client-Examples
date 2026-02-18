@@ -15,14 +15,14 @@ public class SubscribeSample {
 
         try {
             MqttClient client = new MqttClient(broker, clientid, new MemoryPersistence());
-            // 设置连接参数
+            // Set connection parameters
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
             options.setUserName(username);
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(60);
             options.setKeepAliveInterval(60);
-            // 设置回调
+            // Set callback
             client.setCallback(new MqttCallback() {
 
                 public void connectionLost(Throwable cause) {

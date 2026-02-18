@@ -16,7 +16,7 @@
 
 -module(mqttex).
 
--export([run/1]).
+-export([run/1, run_tcp_test/0]).
 
 %-define(HOST, "127.0.0.1").
 -define(HOST, "broker.emqx.io").
@@ -240,3 +240,6 @@ receive_message_example(Client) ->
 
 disconnect(Client) ->
     ok = emqtt:disconnect(Client).
+
+run_tcp_test() ->
+    run(tcp).

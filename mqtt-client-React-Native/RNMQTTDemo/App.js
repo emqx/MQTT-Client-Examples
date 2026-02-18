@@ -24,7 +24,7 @@ const options = {
   path: '/testTopic',
   id: 'id_' + parseInt(Math.random()*100000)
 };
-// 创建客户端实例
+// Create client instance
 client = new Paho.MQTT.Client(options.host, options.port, options.path);
 
 class App extends Component {
@@ -40,18 +40,18 @@ class App extends Component {
     client.onConnectionLost = this.onConnectionLost;
     client.onMessageArrived = this.onMessageArrived;
   }
-  // 连接成功
+  // Connection successful
   onConnect = () => {
     console.log('onConnect');
     this.setState({ status: 'connected' });
   }
-  // 连接失败
+  // Connection failed
   onFailure = (err) => {
     console.log('Connect failed!');
     console.log(err);
     this.setState({ status: 'failed' });
   }
-  // 连接 MQTT 服务器
+  // Connect to MQTT server
   connect = () => {
     this.setState(
       { status: 'isFetching' },
@@ -65,13 +65,13 @@ class App extends Component {
       }
     );
   }
-  // 连接丢失
+  // Connection lost
   onConnectionLost=(responseObject)=>{
     if (responseObject.errorCode !== 0) {
       console.log('onConnectionLost:' + responseObject.errorMessage);
     }
   }
-  // 收到消息
+  // Message received
   onMessageArrived = (message )=> {
     console.log('onMessageArrived:' + message.payloadString);
     newmessageList = this.state.messageList;
@@ -82,7 +82,7 @@ class App extends Component {
   onChangeTopic = (text) => {
     this.setState({ topic: text });
   }
-  // 主题订阅
+  // Topic subscription
   subscribeTopic = () => {
     this.setState(
       { subscribedTopic: this.state.topic },
@@ -91,7 +91,7 @@ class App extends Component {
       }
     );
   }
-  // 取消订阅
+  // Unsubscribe
   unSubscribeTopic = () => {
     client.unsubscribe(this.state.subscribedTopic);
     this.setState({ subscribedTopic: '' });
@@ -99,7 +99,7 @@ class App extends Component {
   onChangeMessage = (text) => {
     this.setState({ message: text });
   }
-  // 消息发布
+  // Message publishing
   sendMessage = () =>{
     var message = new Paho.MQTT.Message(options.id + ':' + this.state.message);
     message.destinationName = this.state.subscribedTopic;
