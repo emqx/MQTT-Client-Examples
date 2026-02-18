@@ -1,0 +1,15 @@
+{
+  "name": "mqtt-client-javascript",
+  "version": "1.0.0",
+  "description": "This repository contains examples of using the MQTT.js library to create MQTT clients in various JavaScript environments. The examples demonstrate how to connect, subscribe, publish, and receive messages using MQTT.js in the following environments:",
+  "main": "mqtt-client-tls-two-way.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^5.15.0"
+  }
+}

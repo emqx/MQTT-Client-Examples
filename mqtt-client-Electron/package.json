@@ -17,10 +17,10 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "dependencies": {
-    "bulma": "^0.9.0",
-    "mqtt": "^4.3.7"
+    "bulma": "^1.0.4",
+    "mqtt": "^5.15.0"
   },
   "devDependencies": {
-    "electron": "19.0.0"
+    "electron": "^40.4.0"
   }
 }

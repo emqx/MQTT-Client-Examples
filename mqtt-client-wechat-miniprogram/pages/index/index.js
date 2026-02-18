@@ -3,7 +3,7 @@ import mqtt from "../../utils/mqtt.min.js";
 Page({
   data: {
     client: null,
-    conenctBtnText: "连接",
+    conenctBtnText: "Connect",
     host: "wx.emqxcloud.cn",
     subTopic: "testtopic/miniprogram",
     pubTopic: "testtopic/miniprogram",
@@ -12,10 +12,10 @@ Page({
     mqttOptions: {
       username: "test",
       password: "test",
-      reconnectPeriod: 1000, // 1000毫秒，设置为 0 禁用自动重连，两次重新连接之间的间隔时间
-      connectTimeout: 30 * 1000, // 30秒，连接超时时间
-      // 更多参数请参阅 MQTT.js 官网文档：https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
-      // 更多 EMQ 相关 MQTT 使用教程可在 EMQ 官方博客中进行搜索：https://www.emqx.com/zh/blog
+      reconnectPeriod: 1000, // 1000ms, set to 0 to disable automatic reconnection, time interval between two reconnections
+      connectTimeout: 30 * 1000, // 30 seconds, connection timeout
+      // For more parameters, please refer to the MQTT.js official documentation: https://github.com/mqttjs/MQTT.js#mqttclientstreambuilder-options
+      // More EMQ related MQTT tutorials can be searched in the official EMQ blog: https://www.emqx.com/zh/blog
     },
   },
 
@@ -45,7 +45,7 @@ Page({
     // 因此不要忘了带上这个 /mqtt !!!
     // 微信小程序中需要将 wss 协议写为 wxs，且由于微信小程序出于安全限制，不支持 ws 协议
     try {
-      this.setValue("conenctBtnText", "连接中...");
+      this.setValue("conenctBtnText", "Connecting...");
       const clientId = new Date().getTime();
       this.data.client = mqtt.connect(`wxs://${this.data.host}:8084/mqtt`, {
         ...this.data.mqttOptions,
@@ -54,7 +54,7 @@ Page({
 
       this.data.client.on("connect", () => {
         wx.showToast({
-          title: "连接成功",
+          title: "Connection successful",
         });
         this.setValue("conenctBtnText", "连接成功");
 

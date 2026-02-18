@@ -21,7 +21,7 @@ msg = b'{"msg":"hello"}'
 
 def sub(topic, msg):
     # Print the topic and message in the callback function
-    print('received message %s on topic %s' % (msg, topic))
+    print('Received message %s on topic %s' % (msg, topic))
 
 
 def main(server=SERVER):

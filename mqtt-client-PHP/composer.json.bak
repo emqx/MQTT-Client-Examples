@@ -1,0 +1,9 @@
+{
+    "require": {
+        "php-mqtt/client": "v1.6.0",
+        "bluerhinos/phpmqtt": "@dev",
+        "simps/mqtt": "^1.4",
+        "ext-swoole": "^4.8",
+        "swoole/ide-helper": "^4.8"
+    }
+}

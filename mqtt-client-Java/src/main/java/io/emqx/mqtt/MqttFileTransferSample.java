@@ -1,6 +1,5 @@
 package io.emqx.mqtt;
 
-import com.sun.deploy.util.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
