@@ -1,0 +1,6 @@
+.vscode/
+build/
+build-*/
+certs/
+docs/
+compile_commands.json
