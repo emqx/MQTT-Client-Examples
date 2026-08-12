@@ -3,8 +3,10 @@ import paho.mqtt.client as mqtt
 
 from django.http import JsonResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
 def publish_message(request):
     request_data = json.loads(request.body)
     
@@ -20,9 +22,17 @@ def publish_message(request):
         port=settings.MQTT_PORT,
         keepalive=settings.MQTT_KEEPALIVE
     )
-    
-    rc, mid = client.publish(request_data["topic"], request_data["msg"])
+
+    # Run the network loop so the CONNECT handshake completes before
+    # publishing, and wait for the publish to be acknowledged
+    client.loop_start()
+    msg_info = client.publish(request_data["topic"], request_data["msg"], qos=1)
+    try:
+        msg_info.wait_for_publish(timeout=5)
+    except (RuntimeError, ValueError):
+        pass
     client.disconnect()
-    
-    return JsonResponse({"code": rc})
+    client.loop_stop()
+
+    return JsonResponse({"code": msg_info.rc})
 
