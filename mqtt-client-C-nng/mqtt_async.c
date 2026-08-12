@@ -214,7 +214,7 @@ client_parse_opts(int argc, char **argv, client_opts *opt)
 	}
 
 	if (opt->url == NULL) {
-		opt->url = nng_strdup("mqtt-tcp://127.0.0.1:1883");
+		opt->url = nng_strdup("mqtt-tcp://broker.emqx.io:1883");
 	}
 
 	if (opt->version == 0) {
@@ -585,7 +585,7 @@ usage(void)
 	       "                     ('mqtt-tcp://host:port' or \n"
 	       "                     'tls+mqtt-tcp://host:port')\n"
 	       "                     [default: "
-	       "mqtt-tcp://127.0.0.1:1883]\n");
+	       "mqtt-tcp://broker.emqx.io:1883]\n");
 	printf("    -n, --parallel   <number of works> (default: 32)\n");
 	printf("    -v, --version    <mqtt version> (default: 4)\n");
 	printf("    -u, --username   <username>\n");
