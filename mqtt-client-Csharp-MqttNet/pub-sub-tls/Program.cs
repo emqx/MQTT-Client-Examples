@@ -5,7 +5,7 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 
-class Pub_sub_tcp
+class Pub_sub_tls
 {
     static async Task Main(string[] args)
     {
@@ -22,6 +22,9 @@ class Pub_sub_tcp
         // Create a MQTT client instance
         var mqttClient = factory.CreateMqttClient();
 
+        // Load the CA certificate of the public broker
+        var caCert = new X509Certificate2("broker.emqx.io-ca.crt");
+
         // Create MQTT client options
         var options = new MqttClientOptionsBuilder()
             .WithTcpServer(broker, port) // MQTT broker address and port
@@ -31,14 +34,24 @@ class Pub_sub_tcp
             .WithTls(
                 o =>
                 {
-                    // The used public broker sometimes has invalid certificates. This sample accepts all
-                    // certificates. This should not be used in live environments.
-                    o.CertificateValidationHandler = _ => true;
+                    // Validate the server certificate chain against the bundled CA
+                    o.CertificateValidationHandler = (certContext) =>
+                    {
+                        var chain = new X509Chain();
+                        chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                        chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+                        chain.ChainPolicy.VerificationFlags = X509VerificationFlags.NoFlag;
+                        chain.ChainPolicy.VerificationTime = DateTime.Now;
+                        chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 0, 0);
+                        chain.ChainPolicy.CustomTrustStore.Add(caCert);
+                        chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                        var x5092 = new X509Certificate2(certContext.Certificate);
+                        return chain.Build(x5092);
+                    };
 
                     // The default value is determined by the OS. Set manually to force version.
                     o.SslProtocol = SslProtocols.Tls12;
-                    var certificate = new X509Certificate("broker.emqx.io-ca.crt", "");
-                    o.Certificates = new List<X509Certificate> { certificate };
                 }
             )
             .Build();
