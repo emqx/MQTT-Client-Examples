@@ -36,8 +36,8 @@
 
 // Broker address. QHostAddress supports IP addresses, except for special cases like localhost and null.
 // const QHostAddress EXAMPLE_HOST = QHostAddress::Null;
-const QHostAddress EXAMPLE_HOST = QHostAddress::LocalHost;
-// const QHostAddress EXAMPLE_HOST = QHostAddress("119.23.236.219");
+// const QHostAddress EXAMPLE_HOST = QHostAddress::LocalHost;
+const QHostAddress EXAMPLE_HOST = QHostAddress("broker.emqx.io");
 // Broker port.
 const quint16 EXAMPLE_PORT = 1883;
 // Topic for subscription/publication
