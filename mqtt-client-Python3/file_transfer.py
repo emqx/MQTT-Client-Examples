@@ -124,6 +124,7 @@ def run():
 
     # Create the MQTT client
     client = mqtt.Client(
+        callback_api_version=mqtt.CallbackAPIVersion.VERSION1,
         client_id=args.client_id,
         protocol=mqtt.MQTTv5,
         transport="tcp",

@@ -5,7 +5,6 @@ import json
 import random
 import sqlite3 as db
 # import duckdb as db
-import time
 
 from paho.mqtt import client as mqtt_client
 
@@ -22,8 +21,6 @@ TABLE_NAME = 'message'
 # create connection to sqlite database
 conn = db.connect(database='./message_log.db')
 
-ts = time.time()
-
 
 def db_init():
     cursor = conn.cursor()
@@ -32,6 +29,11 @@ def db_init():
         (publishAt VARCHAR, clientId VARCHAR, topic VARCHAR)
         ''')
     conn.commit()
+
+
+def quote_identifier(name):
+    # quote an SQLite identifier to prevent SQL injection via JSON keys
+    return '"' + name.replace('"', '""') + '"'
 
 
 def save_message(publish_at, client_id, topic, payload=None, db_conn=conn):
@@ -45,14 +47,15 @@ def save_message(publish_at, client_id, topic, payload=None, db_conn=conn):
             columns = cursor.fetchall()
             # add column if not exist
             if not any(column in col for col in columns):
-                cursor.execute(f'ALTER TABLE {TABLE_NAME} ADD COLUMN {column} VARCHAR')
-            cols.append(f'{column}')
+                cursor.execute(f'ALTER TABLE {TABLE_NAME} ADD COLUMN {quote_identifier(column)} VARCHAR')
+            cols.append(quote_identifier(column))
             vals.append(f'{val}')
         # insert message data into sqlite database
+        placeholders = ','.join('?' for _ in cols)
         cursor.execute(f'''
-            INSERT INTO {TABLE_NAME} (publishAt, clientId, topic, {','.join(cols)}) 
-            VALUES ('{publish_at}', '{client_id}', '{topic}', {','.join(vals)})
-            ''')
+            INSERT INTO {TABLE_NAME} (publishAt, clientId, topic, {','.join(cols)})
+            VALUES (?, ?, ?, {placeholders})
+            ''', (publish_at, client_id, topic, *vals))
 
         conn.commit()
         print("Saved message successfully!")
@@ -69,7 +72,8 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    timestamp = datetime.datetime.fromtimestamp(ts + msg.timestamp)
+    # msg.timestamp is a monotonic clock value, so use the receive time instead
+    timestamp = datetime.datetime.now()
     publish_at = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
     client_id = CLIENT_ID
     topic = msg.topic
