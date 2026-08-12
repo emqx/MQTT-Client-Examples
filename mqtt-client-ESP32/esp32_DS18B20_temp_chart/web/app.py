@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 import json
 import logging
 import os
@@ -66,7 +67,7 @@ def init_mqtt(flask_app: Flask) -> None:
                 data=json.dumps({'text': f"Temperature too high: {temp}"}),
                 headers={'Content-Type': 'application/json'}
             )
-        uptime: str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        uptime: str = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         logging.info(f"Received message: {temp} at {uptime}")
         with app.app_context():
             db = get_db()
@@ -114,7 +115,7 @@ def data():
         hours = 1
 
     db = get_db()
-    min_time: datetime.datetime = datetime.datetime.utcnow() - datetime.timedelta(hours=hours)
+    min_time: datetime.datetime = datetime.datetime.now(timezone.utc) - datetime.timedelta(hours=hours)
     cursor = db.execute(
         "SELECT * FROM temperature_data WHERE uptime > ?",
         (min_time.strftime("%Y-%m-%d %H:%M:%S"),)
@@ -127,6 +128,7 @@ def data():
 
 if __name__ == '__main__':
 
+    os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
     with app.app_context():
         d = get_db()
         d.execute(
