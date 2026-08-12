@@ -42,9 +42,8 @@ subjectAltName = @alt_names
 subjectAltName = @alt_names
 
 [alt_names]
-IP.1 = 1.1.1.1
-# DNS
-# DNS.1 = tls.emqx.io
+IP.1 = 127.0.0.1
+DNS.1 = localhost
 EOF
 
 openssl req -new -key server.key -config openssl.cnf -out server.csr

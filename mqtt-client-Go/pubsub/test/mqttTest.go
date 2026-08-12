@@ -10,7 +10,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-const brokerHost = "112.74.78.165:1883"
+const brokerHost = "broker.emqx.io:1883"
 
 var mqttClient mqtt.Client
 

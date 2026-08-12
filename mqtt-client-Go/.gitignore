@@ -1,0 +1,9 @@
+# generated test certificates and keys
+server/
+client/
+
+# compiled binaries
+/pubsub/pubsub
+/one_way-tls/one_way-tls
+/two_way-tls/two_way-tls
+/file-transfer/file-transfer
