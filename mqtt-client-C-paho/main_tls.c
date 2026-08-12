@@ -3,16 +3,14 @@
 #include "unistd.h"
 #include "MQTTClient.h"
 
-#define ADDRESS     "ssl://127.0.0.1:8883"
+#define ADDRESS     "ssl://broker.emqx.io:8883"
 #define USERNAME    "emqx"
 #define PASSWORD    "public"
 #define CLIENTID    "c-client"
 #define QOS         0
 #define TOPIC       "emqx/c-test"
 #define TIMEOUT     10000L
-#define CLIENTCERT  "/etc/emqx/certs/client-cert.pem"
-#define CACERT      "/etc/emqx/certs/cacert.pem"
-#define PRIVATEKEY  "/etc/emqx/certs/client-key.pem"
+#define CACERT      "./broker.emqx.io-ca.crt"
 
 void publish(MQTTClient client, char *topic, char *payload) {
     MQTTClient_message message = MQTTClient_message_initializer;
@@ -44,26 +42,8 @@ int main(int argc, char *argv[]) {
     conn_opts.password = PASSWORD;
 
 	MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
-	/*
-	 * Set the value of 'verify' to 0, which means
-	 * that the domain should not be checked.
-	 * Otherwise, if the domain does not match,
-	 * an error will occur.
-	 */
-	ssl_opts.verify = 0;
+	ssl_opts.verify = 1;
 	ssl_opts.trustStore = CACERT;
-	/*
-	 * Two-Way SSL Authentiacation needed.
-	 * If you want to use One-Way SSL Authentication,
-	 * please comment out keyStore and privateKey.
-	 */
-	ssl_opts.privateKey = PRIVATEKEY;
-	ssl_opts.keyStore = CLIENTCERT;
-	/*
-	 * Notice: In higher versions of openssl
-	 * the SSL/TLS version is depended on openssl itself.
-	 * (Paho will use TLS_Client_method(), more details please see openssl docs)
-	 */
 	conn_opts.ssl = &ssl_opts;
 
     MQTTClient_setCallbacks(client, NULL, NULL, on_message, NULL);
