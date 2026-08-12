@@ -11,7 +11,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "element-ui": "^2.13.2",
-    "mqtt": "^4.2.1",
+    "mqtt": "^4.3.8",
     "vue": "^2.6.11"
   },
   "devDependencies": {
