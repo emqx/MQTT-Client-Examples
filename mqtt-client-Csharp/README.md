@@ -1,6 +1,6 @@
 # C# MQTT client examples
 In this example we provide example code for C# to subscribe to topics and send messages.
-For more documentation on the use of the paho.mqtt.m2mqtt client, see the [paho.mqtt.m2mqtt - documentation](https://www.eclipse.org/paho/index.php?page=clients/dotnet/index.php)
+For more documentation on the use of the MQTTnet client, see the [MQTTnet - documentation](https://github.com/dotnet/MQTTnet)
 
 
 ## Run
