@@ -10,6 +10,9 @@ function createWindow () {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: false, // Version 12.0.0 above are enabled by default
+      // The preload script require()s the mqtt npm module, which is only
+      // possible with the sandbox disabled
+      sandbox: false,
     }
   })
 
