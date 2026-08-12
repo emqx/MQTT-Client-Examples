@@ -1,15 +1,27 @@
 using System;
-using uPLibrary.Networking.M2Mqtt;
+using System.Text;
+using System.Threading.Tasks;
+using MQTTnet;
+using MQTTnet.Client;
 
 namespace publish
 {
     class Program
     {
-        static MqttClient ConnectMQTT(string broker, int port, string clientId, string username, string password)
+        static async Task<IMqttClient> ConnectMQTT(string broker, int port, string clientId, string username, string password)
         {
-            MqttClient client = new MqttClient(broker, port, false, MqttSslProtocols.None, null, null);
-            client.Connect(clientId, username, password);
-            if (client.IsConnected)
+            var factory = new MqttFactory();
+            var client = factory.CreateMqttClient();
+
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer(broker, port)
+                .WithCredentials(username, password)
+                .WithClientId(clientId)
+                .WithCleanSession()
+                .Build();
+
+            var result = await client.ConnectAsync(options);
+            if (result.ResultCode == MqttClientConnectResultCode.Success)
             {
                 Console.WriteLine("Connected to MQTT Broker");
             }
@@ -19,21 +31,25 @@ namespace publish
             }
             return client;
         }
-        
-        static void Publish(MqttClient client, string topic)
+
+        static async Task Publish(IMqttClient client, string topic)
         {
             int msg_count = 0;
             while (true)
             {
-                System.Threading.Thread.Sleep(1 * 1000);
+                await Task.Delay(1 * 1000);
                 string msg = "messages: " + msg_count.ToString();
-                client.Publish(topic, System.Text.Encoding.UTF8.GetBytes(msg));
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic(topic)
+                    .WithPayload(Encoding.UTF8.GetBytes(msg))
+                    .Build();
+                await client.PublishAsync(message);
                 Console.WriteLine("Send `{0}` to topic `{1}`", msg, topic);
                 msg_count++;
             }
         }
-        
-        static void Main(string[] args)
+
+        static async Task Main(string[] args)
         {
             string broker = "broker.emqx.io";
             int port = 1883;
@@ -41,8 +57,8 @@ namespace publish
             string clientId = Guid.NewGuid().ToString();
             string username = "emqx";
             string password = "public";
-            MqttClient client = ConnectMQTT(broker, port, clientId, username, password);
-            Publish(client, topic);
+            var client = await ConnectMQTT(broker, port, clientId, username, password);
+            await Publish(client, topic);
         }
     }
 }

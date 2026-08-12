@@ -5,11 +5,11 @@
 
         static void Main(string[] args)
         {
-            // Self-signed certificate one-way authentication
-            // MqttClient.Client.TlsClientWithCA("E:/certs/cacert.pem").Wait();
+            // One-way TLS authentication: verify the server certificate against the CA
+            MqttClient.Client.TlsClientWithCA("./broker.emqx.io-ca.crt").Wait();
 
-            // Two-way authentication
-            MqttClient.Client.TlsClientWithCert(@"E:/certs/cacert.pem", @"E:/certs/client.pfx","123456").Wait();
+            // Two-way TLS authentication (requires your own client certificate):
+            // MqttClient.Client.TlsClientWithCert("./broker.emqx.io-ca.crt", "path/to/client.pfx", "password").Wait();
         }
     }
 }

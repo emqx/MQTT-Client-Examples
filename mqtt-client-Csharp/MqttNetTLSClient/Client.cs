@@ -19,8 +19,8 @@ namespace MqttClient
 
             using (var mqttClient = mqttFactory.CreateMqttClient())
             {
-                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("192.168.1.139", 8883)
-                    .WithCredentials("emqx", "emqx123")
+                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("broker.emqx.io", 8883)
+                    .WithCredentials("emqx", "public")
                     .WithTls(
                         new MqttClientOptionsBuilderTlsParameters()
                         {
@@ -95,17 +95,28 @@ namespace MqttClient
 
             using (var mqttClient = mqttFactory.CreateMqttClient())
             {
-                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("192.168.1.139", 8883)
-                    .WithCredentials("emqx", "emqx123")
+                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("broker.emqx.io", 8883)
+                    .WithCredentials("emqx", "public")
                     .WithTls(
                         new MqttClientOptionsBuilderTlsParameters()
                         {
                             UseTls = true,
                             SslProtocol = System.Security.Authentication.SslProtocols.Tls12,
-                            
-                            CertificateValidationHandler = (o) =>
+
+                            CertificateValidationHandler = (certContext) =>
                             {
-                                return true;
+                                X509Chain chain = new X509Chain();
+                                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+                                chain.ChainPolicy.VerificationFlags = X509VerificationFlags.NoFlag;
+                                chain.ChainPolicy.VerificationTime = DateTime.Now;
+                                chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 0, 0);
+                                chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2(cacert));
+                                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                                var x5092 = new X509Certificate2(certContext.Certificate);
+
+                                return chain.Build(x5092);
                             },
                             Certificates = new List<X509Certificate>() {
                             cacert, newCert
