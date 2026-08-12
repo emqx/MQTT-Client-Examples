@@ -73,16 +73,12 @@ public class SubscriptionFragment extends BaseFragment {
         String topic = mTopic.getText().toString();
         int qos = 0;
         int qosCheckedId = mRadioGroup.getCheckedRadioButtonId();
-        switch (qosCheckedId) {
-            case R.id.qos0:
-                qos = 0;
-                break;
-            case R.id.qos1:
-                qos = 1;
-                break;
-            case R.id.qos2:
-                qos = 2;
-                break;
+        if (qosCheckedId == R.id.qos0) {
+            qos = 0;
+        } else if (qosCheckedId == R.id.qos1) {
+            qos = 1;
+        } else if (qosCheckedId == R.id.qos2) {
+            qos = 2;
         }
 
 

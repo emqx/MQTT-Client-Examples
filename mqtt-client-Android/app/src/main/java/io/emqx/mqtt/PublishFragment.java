@@ -78,27 +78,19 @@ public class PublishFragment extends BaseFragment {
         String message = mPayload.getText().toString();
         int qos = 0;
         int qosCheckedId = mQosRadioGroup.getCheckedRadioButtonId();
-        switch (qosCheckedId) {
-            case R.id.qos0:
-                qos = 0;
-                break;
-            case R.id.qos1:
-                qos = 1;
-                break;
-            case R.id.qos2:
-                qos = 2;
-                break;
+        if (qosCheckedId == R.id.qos0) {
+            qos = 0;
+        } else if (qosCheckedId == R.id.qos1) {
+            qos = 1;
+        } else if (qosCheckedId == R.id.qos2) {
+            qos = 2;
         }
         boolean retained = false;
         int retainedCheckedId = mRetainedRadioGroup.getCheckedRadioButtonId();
-        switch (retainedCheckedId) {
-            case R.id.retained_true:
-                retained = true;
-                break;
-            case R.id.retained_false:
-                retained = false;
-                break;
-
+        if (retainedCheckedId == R.id.retained_true) {
+            retained = true;
+        } else if (retainedCheckedId == R.id.retained_false) {
+            retained = false;
         }
 
         return new Publish(topic, message, qos, retained);
