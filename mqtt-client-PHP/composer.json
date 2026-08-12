@@ -1,6 +1,7 @@
 {
     "require": {
-        "php-mqtt/client": "^1.6.0",
+        "php": ">=8.1",
+        "php-mqtt/client": "^2.3",
         "bluerhinos/phpmqtt": "^1.0",
         "simps/mqtt": "^1.4.6",
         "psr/log": "^3.0.2"

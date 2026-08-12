@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "792889c959a66b93cc0cb83177866760",
+    "content-hash": "8e35937a68381c596e9f03de2f9f93f5",
     "packages": [
         {
             "name": "bluerhinos/phpmqtt",
@@ -111,21 +111,21 @@
         },
         {
             "name": "php-mqtt/client",
-            "version": "v1.8.1",
+            "version": "v2.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mqtt/client.git",
-                "reference": "92e348db89c8362947e2efb8df9ba819cea428f2"
+                "reference": "97df2f592599f72fb7975eb504333a8df3841ea9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mqtt/client/zipball/92e348db89c8362947e2efb8df9ba819cea428f2",
-                "reference": "92e348db89c8362947e2efb8df9ba819cea428f2",
+                "url": "https://api.github.com/repos/php-mqtt/client/zipball/97df2f592599f72fb7975eb504333a8df3841ea9",
+                "reference": "97df2f592599f72fb7975eb504333a8df3841ea9",
                 "shasum": ""
             },
             "require": {
                 "myclabs/php-enum": "^1.7",
-                "php": "^7.4|^8.0",
+                "php": "^8.0",
                 "psr/log": "^1.1|^2.0|^3.0"
             },
             "require-dev": {
@@ -162,9 +162,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mqtt/client/issues",
-                "source": "https://github.com/php-mqtt/client/tree/v1.8.1"
+                "source": "https://github.com/php-mqtt/client/tree/v2.3.2"
             },
-            "time": "2023-08-10T16:18:24+00:00"
+            "time": "2026-03-28T12:01:13+00:00"
         },
         {
             "name": "psr/log",
@@ -305,10 +305,12 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform": {
+        "php": ">=8.1"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
 }
