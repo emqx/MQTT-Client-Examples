@@ -1,0 +1,6 @@
+.gradle/
+build/
+app/build/
+serviceLibrary/build/
+basicSample/build/
+extendedSample/build/

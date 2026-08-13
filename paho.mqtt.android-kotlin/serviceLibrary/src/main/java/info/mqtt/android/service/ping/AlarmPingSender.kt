@@ -61,10 +61,11 @@ internal class AlarmPingSender(val service: MqttService) : MqttPingSender {
     override fun stop() {
         Timber.d("Unregister AlarmReceiver to MqttService ${clientComms!!.client.clientId}")
         if (hasStarted) {
-            if (pendingIntent != null) {
+            val pi = pendingIntent
+            if (pi != null) {
                 // Cancel Alarm.
                 val alarmManager = service.getSystemService(Service.ALARM_SERVICE) as AlarmManager
-                alarmManager.cancel(pendingIntent)
+                alarmManager.cancel(pi)
             }
             hasStarted = false
             try {
@@ -79,14 +80,16 @@ internal class AlarmPingSender(val service: MqttService) : MqttPingSender {
         val nextAlarmInMilliseconds = SystemClock.elapsedRealtime() + delayInMilliseconds
         Timber.d("Schedule next alarm at $nextAlarmInMilliseconds ms")
         val alarmManager = service.getSystemService(Service.ALARM_SERVICE) as AlarmManager
+        val pi = pendingIntent ?: return
         if (Build.VERSION.SDK_INT >= 23) {
             // In SDK 23 and above, dosing will prevent setExact, setExactAndAllowWhileIdle will force
             // the device to run this task whilst dosing.
             Timber.d("Alarm schedule using setExactAndAllowWhileIdle, next: $delayInMilliseconds")
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmInMilliseconds, pendingIntent)
-        } else
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmInMilliseconds, pi)
+        } else {
             Timber.d("Alarm schedule using setExact, delay: $delayInMilliseconds")
-        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmInMilliseconds, pendingIntent)
+            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextAlarmInMilliseconds, pi)
+        }
     }
 
     fun backgroundExecute(comms: ClientComms?): Boolean {
