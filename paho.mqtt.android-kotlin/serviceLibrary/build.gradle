@@ -7,6 +7,16 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildFeatures {
+        buildConfig = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 
     defaultConfig {
         minSdkVersion 21
@@ -57,7 +67,7 @@ dependencies {
 }
 
 task androidSourcesJar(type: Jar) {
-    classifier 'sources'
+    archiveClassifier = 'sources'
     from android.sourceSets.main.java.srcDirs
 }
 
@@ -65,7 +75,7 @@ project.afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
+                from components.findByName('release')
                 artifact androidSourcesJar
             }
         }
