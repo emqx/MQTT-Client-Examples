@@ -23,7 +23,8 @@ class Pub_sub_tls
         var mqttClient = factory.CreateMqttClient();
 
         // Load the CA certificate of the public broker
-        var caCert = new X509Certificate2("broker.emqx.io-ca.crt");
+        var caCertPath = Path.Combine(AppContext.BaseDirectory, "broker.emqx.io-ca.crt");
+        var caCert = X509CertificateLoader.LoadCertificateFromFile(caCertPath);
 
         // Create MQTT client options
         var options = new MqttClientOptionsBuilder()
