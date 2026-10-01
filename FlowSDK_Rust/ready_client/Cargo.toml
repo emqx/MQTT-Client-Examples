@@ -1,0 +1,12 @@
+[package]
+name = "flowsdk-ready-client"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+
+[dependencies]
+flowsdk = { version = "=0.6.2", default-features = false, features = ["strict-protocol-compliance", "async-client"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }
+async-trait = "0.1"
+clap = { version = "4.5", features = ["derive"] }
